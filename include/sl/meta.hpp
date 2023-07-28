@@ -3,3 +3,5 @@
 //
 
 #pragma once
+
+#include "sl/meta/string/string.hpp"

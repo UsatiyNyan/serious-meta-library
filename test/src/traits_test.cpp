@@ -22,4 +22,20 @@ TEST(traits, isAnyNargsConstructible) {
     static_assert(!is_any_nargs_constructible_v<some_tuple_t, 4>);
 }
 
+TEST(traits, countFields) {
+    struct TestStruct {
+        int i;
+        std::string s;
+        std::vector<int> vi;
+    };
+
+    static_assert(count_fields<TestStruct>() == 3);
+}
+
+TEST(traits, countFieldsEmpty) {
+    struct TestStructEmpty {};
+
+    static_assert(count_fields<TestStructEmpty>() == 0);
+}
+
 } // namespace sl::meta

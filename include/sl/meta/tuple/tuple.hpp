@@ -5,3 +5,4 @@
 #pragma once
 
 #include "sl/meta/tuple/for_each.hpp"
+#include "sl/meta/tuple/apply.hpp"

@@ -1,0 +1,16 @@
+#pragma once
+
+#include <utility>
+
+namespace sl::meta::detail {
+
+template <typename T, typename F>
+auto apply(F&& func, T&&, std::integral_constant<std::size_t, 0>) {
+    return std::forward<F>(func)();
+}
+
+// clang-format off
+@generated_code@
+// clang-format on
+
+} // namespace sl::meta::detail

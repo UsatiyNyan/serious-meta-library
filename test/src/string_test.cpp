@@ -2,7 +2,7 @@
 // Created by usatiynyan on 7/28/23.
 //
 
-#include "sl/meta/string/string.hpp"
+#include "sl/meta/string.hpp"
 
 #include <gtest/gtest.h>
 

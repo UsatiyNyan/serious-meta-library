@@ -2,7 +2,7 @@
 // Created by usatiynyan on 7/30/23.
 //
 
-#include "sl/meta/tuple/tuple.hpp"
+#include "sl/meta/tuple.hpp"
 
 #include <gtest/gtest.h>
 

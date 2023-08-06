@@ -4,5 +4,6 @@
 
 #pragma once
 
-#include "sl/meta/string/string.hpp"
-#include "sl/meta/tuple/tuple.hpp"
+#include "sl/meta/string.hpp"
+#include "sl/meta/tuple.hpp"
+#include "sl/meta/traits.hpp"

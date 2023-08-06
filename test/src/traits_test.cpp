@@ -2,7 +2,7 @@
 // Created by usatiynyan on 8/1/23.
 //
 
-#include "sl/meta/traits/traits.hpp"
+#include "sl/meta/traits.hpp"
 
 #include <gtest/gtest.h>
 

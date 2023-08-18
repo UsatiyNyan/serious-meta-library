@@ -10,9 +10,22 @@
 namespace sl::meta {
 namespace detail {
 
+template <typename T, typename... TArgs>
+class is_constructible {
+private:
+    template <typename U, typename... UArgs>
+    static auto test(int) -> decltype(U{ std::declval<UArgs>()... }, std::true_type{});
+
+    template <typename, typename...>
+    static auto test(...) -> std::false_type;
+
+public:
+    static constexpr bool value = decltype(test<T, TArgs...>(0))::value;
+};
+
 template <typename T, typename TArg, std::size_t... Idxs>
 constexpr auto is_nargs_constructible(std::index_sequence<Idxs...>)
-    -> std::is_constructible<T, decltype(Idxs, std::declval<TArg>())...>;
+    -> is_constructible<T, decltype(Idxs, std::declval<TArg>())...>;
 
 struct any_convertible {
     template <typename T>

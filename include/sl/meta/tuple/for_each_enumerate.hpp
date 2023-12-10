@@ -18,15 +18,6 @@ auto for_each_enumerate(F&& func, TupleT& tuple, std::index_sequence<idxs...>) {
     }
 }
 
-template <typename F, typename TupleT, std::size_t... idxs>
-auto for_each_enumerate(F&& func, const TupleT& tuple, std::index_sequence<idxs...>) {
-    if constexpr ((std::is_void_v<decltype(func(std::get<idxs>(tuple)))> || ...)) {
-        (std::forward<F>(func)(idxs, std::get<idxs>(tuple)), ...);
-    } else {
-        return std::tuple{ std::forward<F>(func)(idxs, std::get<idxs>(tuple))... };
-    }
-}
-
 } // namespace detail
 
 template <typename F, template <typename...> typename TupleT, typename... Ts>

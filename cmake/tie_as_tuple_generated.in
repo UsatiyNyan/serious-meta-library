@@ -4,9 +4,9 @@
 
 namespace sl::meta::detail {
 
-template <typename T, typename F>
-auto apply(F&& func, T&&, std::integral_constant<std::size_t, 0>) {
-    return std::forward<F>(func)();
+template <typename T>
+auto tie_as_tuple(T&, std::integral_constant<std::size_t, 0>) {
+    return std::tie();
 }
 
 // clang-format off

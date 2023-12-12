@@ -34,17 +34,31 @@ TEST_F(for_each_fixture, ref) {
     ASSERT_EQ(std::get<1>(tuple_), s_field_ + s_field_);
 }
 
-TEST(tuple, applyAsTuple) {
+TEST(tuple, tieAsTuple) {
     struct TestStruct {
         int i;
         std::string s;
     };
 
-    const auto result = apply([](int an_i, std::string an_s) {
-        return std::to_string(an_i) + std::move(an_s);
-    }, TestStruct{100, "aaa"});
+    TestStruct test_value{ 100, "aaa" };
+    ASSERT_EQ(&std::get<0>(tie_as_tuple(test_value)), &test_value.i);
+    ASSERT_EQ(&std::get<1>(tie_as_tuple(test_value)), &test_value.s);
 
-    ASSERT_EQ(result, "100aaa");
+    std::apply(
+        [](int& an_i, std::string& an_s) {
+            an_i += an_i;
+            an_s += an_s;
+        },
+        tie_as_tuple(test_value)
+    );
+    ASSERT_EQ(test_value.i, 200);
+    ASSERT_EQ(test_value.s, "aaaaaa");
+
+    const auto result = std::apply(
+        [](const int& an_i, const std::string& an_s) { return std::to_string(an_i) + an_s; },
+        tie_as_tuple(std::cref(test_value).get())
+    );
+    ASSERT_EQ(result, "200aaaaaa");
 }
 
 } // namespace sl::meta

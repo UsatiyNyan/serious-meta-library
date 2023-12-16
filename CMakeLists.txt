@@ -19,6 +19,8 @@ project(
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE include)
 
+add_subdirectory(dependencies)
+
 # tie as tuple generation
 include(cmake/generate_tie_as_tuple.cmake)
 set(SL_GENERATE_N_FIELDS 64 CACHE STRING "Max amount of fields to generate tie_as_tuple for")

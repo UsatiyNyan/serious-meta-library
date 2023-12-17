@@ -9,10 +9,13 @@
 
 namespace sl::meta {
 
-// tie any aggregate strucutre as tuple
-template <typename T>
-auto tie_as_tuple(T& value) {
-    return detail::tie_as_tuple(value, std::integral_constant<std::size_t, count_fields<T>()>{});
+template <typename AggregateT>
+    requires std::is_aggregate_v<AggregateT>
+auto tie_as_tuple(AggregateT& value) {
+    return detail::tie_as_tuple(value, std::integral_constant<std::size_t, count_fields<AggregateT>()>{});
 }
+
+template <typename T>
+using tie_as_tuple_t = decltype(tie_as_tuple(std::declval<T&>()));
 
 } // namespace sl::meta

@@ -10,7 +10,8 @@
 namespace sl::meta {
 namespace detail {
 
-template <typename T, typename... TArgs>
+template <typename AggregateT, typename... TArgs>
+    requires std::is_aggregate_v<AggregateT>
 class is_constructible {
 private:
     template <typename U, typename... UArgs>
@@ -20,7 +21,7 @@ private:
     static auto test(...) -> std::false_type;
 
 public:
-    static constexpr bool value = decltype(test<T, TArgs...>(0))::value;
+    static constexpr bool value = decltype(test<AggregateT, TArgs...>(0))::value;
 };
 
 template <typename T, typename TArg, std::size_t... Idxs>

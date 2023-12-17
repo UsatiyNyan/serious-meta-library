@@ -26,9 +26,10 @@ constexpr std::size_t count_fields() {
 } // namespace detail
 
 // count fields in an aggregate, for tuple use std::tuple_size
-template <typename T>
+template <typename AggregateT>
+    requires std::is_aggregate_v<AggregateT>
 constexpr std::size_t count_fields() {
-    return detail::count_fields<std::decay_t<T>, 0, (sizeof(T) / sizeof(std::byte) - 1)>();
+    return detail::count_fields<std::decay_t<AggregateT>, 0, (sizeof(AggregateT) / sizeof(std::byte) - 1)>();
 }
 
 } // namespace sl::meta

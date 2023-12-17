@@ -25,8 +25,6 @@ struct for_each_type<TupleT<Ts...>> {
     }
 };
 
-
-
 } // namespace detail
 
 template <template <typename> typename F, typename TupleT>

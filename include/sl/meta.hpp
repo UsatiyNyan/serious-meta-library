@@ -8,3 +8,4 @@
 #include "sl/meta/tuple.hpp"
 #include "sl/meta/traits.hpp"
 #include "sl/meta/lifetime.hpp"
+#include "sl/meta/field.hpp"

@@ -9,3 +9,4 @@
 #include "sl/meta/tuple/for_each_enumerate.hpp"
 #include "sl/meta/tuple/for_each_meta_enumerate.hpp"
 #include "sl/meta/tuple/tie_as_tuple.hpp"
+#include "sl/meta/tuple/for_each_type.hpp"

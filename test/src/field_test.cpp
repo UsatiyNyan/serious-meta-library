@@ -8,15 +8,6 @@
 
 namespace sl::meta {
 
-TEST(field, alignedField) {
-    struct AlignedFieldAggregate {
-        aligned_field<int> i;
-        aligned_field<char, int> c;
-    };
-    static_assert(is_tightly_packed<AlignedFieldAggregate>);
-    static_assert(sizeof(AlignedFieldAggregate) == sizeof(int) * 2);
-}
-
 TEST(field, isTightlyPacked) {
     struct TightlyPackedStruct {
         int i;
@@ -29,6 +20,16 @@ TEST(field, isTightlyPacked) {
         char c;
     };
     static_assert(!is_tightly_packed<NotTightlyPackedStruct>);
+}
+
+TEST(field, alignedField) {
+    struct AlignedFieldAggregate {
+        aligned_field<int, int> i;
+        aligned_field<char, int> c;
+        aligned_field<uint8_t[3], uint32_t> cs;
+    };
+    static_assert(is_tightly_packed<AlignedFieldAggregate>);
+    static_assert(sizeof(AlignedFieldAggregate) == sizeof(int) + sizeof(int) + sizeof(uint32_t));
 }
 
 } // namespace sl::meta

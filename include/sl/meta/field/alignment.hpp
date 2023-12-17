@@ -18,12 +18,6 @@ struct get_sizeof {
 
 } // namespace detail
 
-template <typename T, typename AlignAsT = T>
-struct aligned_field {
-    static_assert(alignof(AlignAsT) >= sizeof(T));
-    alignas(AlignAsT) T value;
-};
-
 template <typename AggregateT>
 constexpr std::size_t sum_of_field_sizes() {
     using decayed_tied_tuple = decay_tuple_t<tie_as_tuple_t<AggregateT>>;
@@ -33,5 +27,17 @@ constexpr std::size_t sum_of_field_sizes() {
 
 template <typename AggregateT>
 constexpr bool is_tightly_packed = sizeof(AggregateT) == sum_of_field_sizes<AggregateT>();
+
+template <typename T, typename AlignAsT>
+struct aligned_field {
+    static_assert(alignof(AlignAsT) >= sizeof(T));
+    alignas(AlignAsT) T value;
+};
+
+template <typename T, std::size_t N, typename AlignAsT>
+struct aligned_field<T[N], AlignAsT> {
+    static_assert(alignof(AlignAsT) >= sizeof(T));
+    alignas(AlignAsT) T value[N];
+};
 
 } // namespace sl::meta

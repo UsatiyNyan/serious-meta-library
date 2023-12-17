@@ -63,11 +63,11 @@ TEST(tuple, tieAsTuple) {
 
 template <typename T>
 struct Detector {
-    constexpr auto operator()() const { return T{ 42 }; }
+    constexpr auto operator()(int value) const { return static_cast<T>(value); }
 };
 
 TEST(tuple, forEachType) {
-    constexpr auto type_names = for_each_type<Detector, std::tuple<int, char, long>>();
+    constexpr auto type_names = for_each_type<Detector, std::tuple<int, char, long>>(42);
     constexpr std::tuple<int, char, long> type_names_test{42, 42, 42};
     static_assert(type_names == type_names_test);
 }

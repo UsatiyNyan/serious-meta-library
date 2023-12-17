@@ -15,21 +15,21 @@ struct for_each_type;
 
 template <template <typename...> typename TupleT, typename... Ts>
 struct for_each_type<TupleT<Ts...>> {
-    template <template <typename> typename F>
-    constexpr static auto apply() {
-        if constexpr ((std::is_void_v<decltype(F<Ts>{}())> || ...)) {
-            (F<Ts>{}(), ...);
+    template <template <typename> typename F, typename... Args>
+    constexpr static auto apply(Args&&... args) {
+        if constexpr ((std::is_void_v<decltype(F<Ts>{}(std::forward<Args>(args)...))> || ...)) {
+            (F<Ts>{}(std::forward<Args>(args)...), ...);
         } else {
-            return std::tuple{ F<Ts>{}()... };
+            return std::tuple{ F<Ts>{}(std::forward<Args>(args)...)... };
         }
     }
 };
 
 } // namespace detail
 
-template <template <typename> typename F, typename TupleT>
-constexpr auto for_each_type() {
-    return detail::for_each_type<TupleT>::template apply<F>();
+template <template <typename> typename F, typename TupleT, typename... Args>
+constexpr auto for_each_type(Args&&... args) {
+    return detail::for_each_type<TupleT>::template apply<F>(std::forward<Args>(args)...);
 }
 
 } // namespace sl::meta

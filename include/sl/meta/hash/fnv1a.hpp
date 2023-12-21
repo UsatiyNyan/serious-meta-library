@@ -23,7 +23,7 @@ namespace detail {
 template <typename T, T offset, T prime, std::size_t... idxs>
 constexpr T fnv1a(const char* s, std::index_sequence<idxs...>) {
     T hash = offset;
-    ((hash = (hash ^ s[idxs]) * prime), ...);
+    ((hash = (hash ^ static_cast<T>(s[idxs])) * prime), ...);
     return hash;
 }
 

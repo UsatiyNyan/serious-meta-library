@@ -8,13 +8,16 @@
 
 namespace sl::meta {
 
-using some_tuple_t =
-    std::tuple<std::optional<std::string>, std::optional<int>, std::optional<std::vector<std::string>>>;
+struct TestStructOfOpts {
+    std::optional<std::string> s;
+    std::optional<int> i;
+    std::optional<std::vector<std::string>> vs;
+};
 
 TEST(traits, isNargsConstructible) {
-    static_assert(is_nargs_constructible_v<some_tuple_t, std::nullopt_t, 3>);
-    static_assert(!is_nargs_constructible_v<some_tuple_t, std::nullopt_t, 2>);
-    static_assert(!is_nargs_constructible_v<some_tuple_t, std::string, 3>);
+    static_assert(is_nargs_constructible_v<TestStructOfOpts, std::nullopt_t, 2>);
+    static_assert(is_nargs_constructible_v<TestStructOfOpts, std::nullopt_t, 3>);
+    static_assert(!is_nargs_constructible_v<TestStructOfOpts, std::string, 3>);
 }
 
 struct TestStruct {

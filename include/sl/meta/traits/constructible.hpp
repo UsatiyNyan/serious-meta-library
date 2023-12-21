@@ -14,8 +14,12 @@ template <typename AggregateT, typename... TArgs>
     requires std::is_aggregate_v<AggregateT>
 class is_constructible {
 private:
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
     template <typename U, typename... UArgs>
     static auto test(int) -> decltype(U{ std::declval<UArgs>()... }, std::true_type{});
+#pragma GCC diagnostic pop
 
     template <typename, typename...>
     static auto test(...) -> std::false_type;

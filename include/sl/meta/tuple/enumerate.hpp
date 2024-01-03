@@ -12,9 +12,10 @@ namespace sl::meta {
 namespace detail {
 
 template <typename TupleT, std::size_t... idxs>
-auto enumerate(TupleT& tuple, std::index_sequence<idxs...>)
-    -> std::tuple<std::tuple<std::size_t, std::tuple_element_t<idxs, TupleT>>...> {
-    return std::tuple{ std::tuple{ idxs, std::get<idxs>(tuple) }... };
+auto enumerate(TupleT& tuple, std::index_sequence<idxs...>) {
+    return std::tuple{
+        std::tuple<std::size_t, std::tuple_element_t<idxs, TupleT>>{ idxs, std::get<idxs>(tuple) }... //
+    };
 }
 
 } // namespace detail

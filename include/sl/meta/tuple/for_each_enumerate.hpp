@@ -20,13 +20,13 @@ auto for_each_enumerate(F&& func, TupleT& tuple, std::index_sequence<idxs...>) {
 
 } // namespace detail
 
-template <typename F, template <typename...> typename TupleT, typename... Ts>
-auto for_each_enumerate(F&& func, TupleT<Ts...>& tuple) {
+template <typename F, typename... Ts>
+auto for_each_enumerate(F&& func, std::tuple<Ts...>& tuple) {
     return detail::for_each_enumerate(std::forward<F>(func), tuple, std::make_index_sequence<sizeof...(Ts)>());
 }
 
-template <typename F, template <typename...> typename TupleT, typename... Ts>
-auto for_each_enumerate(F&& func, const TupleT<Ts...>& tuple) {
+template <typename F, typename... Ts>
+auto for_each_enumerate(F&& func, const std::tuple<Ts...>& tuple) {
     return detail::for_each_enumerate(std::forward<F>(func), tuple, std::make_index_sequence<sizeof...(Ts)>());
 }
 

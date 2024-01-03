@@ -20,13 +20,13 @@ auto for_each_meta_enumerate(TupleT& tuple, std::index_sequence<idxs...>) {
 
 } // namespace detail
 
-template <template <std::size_t> typename F, template <typename...> typename TupleT, typename... Ts>
-auto for_each_meta_enumerate(TupleT<Ts...>& tuple) {
+template <template <std::size_t> typename F, typename... Ts>
+auto for_each_meta_enumerate(std::tuple<Ts...>& tuple) {
     return detail::for_each_meta_enumerate<F>(tuple, std::make_index_sequence<sizeof...(Ts)>());
 }
 
-template <template <std::size_t> typename F, template <typename...> typename TupleT, typename... Ts>
-auto for_each_meta_enumerate(const TupleT<Ts...>& tuple) {
+template <template <std::size_t> typename F, typename... Ts>
+auto for_each_meta_enumerate(const std::tuple<Ts...>& tuple) {
     return detail::for_each_meta_enumerate<F>(tuple, std::make_index_sequence<sizeof...(Ts)>());
 }
 

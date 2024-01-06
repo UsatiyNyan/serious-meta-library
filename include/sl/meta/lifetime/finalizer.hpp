@@ -6,7 +6,7 @@
 
 #include <function2/function2.hpp>
 
-namespace sl {
+namespace sl::meta {
 // CRTP
 template <typename Self>
 class finalizer {
@@ -46,4 +46,4 @@ private:
 private:
     finalizer_function_t f_{};
 };
-} // namespace sl
+} // namespace sl::meta

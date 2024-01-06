@@ -6,7 +6,7 @@
 
 #include <function2/function2.hpp>
 
-namespace sl {
+namespace sl::meta {
 class defer {
     using defer_function_t = fu2::function_base<
         /*IsOwning=*/true,
@@ -44,4 +44,4 @@ private:
 private:
     defer_function_t f_{};
 };
-} // namespace sl
+} // namespace sl::meta

@@ -4,8 +4,6 @@
 
 #pragma once
 
-#pragma once
-
 #include <tuple>
 
 namespace sl::meta {

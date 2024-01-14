@@ -3,6 +3,7 @@
 
 # BUILD
 *-build-*
+/build
 
 # CMAKE
 CMakeLists.txt.user

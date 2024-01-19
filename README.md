@@ -17,4 +17,6 @@ For serious programmers.
 - "sl/meta/optional.hpp"
     - uses tl::optional
     - helpers for tuple<->optional operations
+- "sl/meta/func.hpp"
+    - meta function utilities
 

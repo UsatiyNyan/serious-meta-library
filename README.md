@@ -19,4 +19,8 @@ For serious programmers.
     - helpers for tuple<->optional operations
 - "sl/meta/func.hpp"
     - meta function utilities
-
+- "sl/meta/hash.hpp"
+    - constexpr hash functions
+- "sl/meta/match.hpp"
+    - constexpr match statement and mapping
+    - can be bidirectional

@@ -64,10 +64,10 @@ TEST(match, bimatch) {
     constexpr bimatch<std::string_view, int> value_match_3{ 3 };
     constexpr bimatch<std::string_view, int> value_match_4{ 4 };
 
-    ASSERT_EQ(use(value_match_1).key(), std::string_view{ "a" });
-    ASSERT_EQ(use(value_match_2).key(), std::string_view{ "b" });
-    ASSERT_EQ(use(value_match_3).key(), std::string_view{ "c" });
-    ASSERT_EQ(use(value_match_4).key(), tl::nullopt);
+    static_assert(use(value_match_1).key() == std::string_view{ "a" });
+    static_assert(use(value_match_2).key() == std::string_view{ "b" });
+    static_assert(use(value_match_3).key() == std::string_view{ "c" });
+    static_assert(use(value_match_4).key() == tl::nullopt);
 }
 
 TEST(match, bimatchMap) {
@@ -77,15 +77,16 @@ TEST(match, bimatchMap) {
             .case_("b", 2)
             .case_("c", 3);
     });
+
     static_assert(m.value("a") == 1);
     static_assert(m.value("b") == 2);
     static_assert(m.value("c") == 3);
     static_assert(m.value("d") == tl::nullopt);
 
-    ASSERT_EQ(m.key(1), std::string_view{ "a" });
-    ASSERT_EQ(m.key(2), std::string_view{ "b" });
-    ASSERT_EQ(m.key(3), std::string_view{ "c" });
-    ASSERT_EQ(m.key(4), tl::nullopt);
+    static_assert(m.key(1) == std::string_view{ "a" });
+    static_assert(m.key(2) == std::string_view{ "b" });
+    static_assert(m.key(3) == std::string_view{ "c" });
+    static_assert(m.key(4) == tl::nullopt);
 }
 
 } // namespace sl::meta

@@ -11,13 +11,16 @@ namespace sl::meta {
 
 template <typename Key, typename Value>
 struct match {
-    constexpr match(Key key) : key_{ std::move(key) } {}
-    constexpr match& case_(const Key& key, const Value& value) {
+    constexpr explicit match(Key key, tl::optional<Value> value = tl::nullopt)
+        : key_{ std::move(key) }, value_{ std::move(value) } {}
+
+    constexpr match case_(Key key, Value value) {
         if (!value_.has_value() && key_ == key) {
-            value_ = value;
+            return match{ std::move(key), std::move(value) };
         }
         return *this;
     }
+
     constexpr tl::optional<Value> result() && { return std::move(value_); }
 
 private:

@@ -5,20 +5,19 @@
 #pragma once
 
 #include "sl/meta/conn/slot.hpp"
-#include "sl/meta/func/unit.hpp"
 
 #include <list>
 
 namespace sl::meta {
 
-template <typename T = unit>
+template <typename... Ts>
 class signal {
 public:
-    using connection = typename std::list<slot<T>>::iterator;
+    using connection = typename std::list<slot<Ts...>>::iterator;
 
-    void operator()(const T& value) noexcept {
+    void operator()(const Ts&... values) noexcept {
         for (auto& slot_item : slots_) {
-            slot_item(value);
+            slot_item(values...);
         }
     }
 
@@ -31,7 +30,7 @@ public:
     void disconnect(connection c) { slots_.erase(c); }
 
 private:
-    std::list<slot<T>> slots_;
+    std::list<slot<Ts...>> slots_;
 };
 
 } // namespace sl::meta

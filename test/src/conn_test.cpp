@@ -10,27 +10,27 @@
 namespace sl::meta {
 
 TEST(conn, oneUnit) {
-    signal<unit> signal;
+    signal<> signal;
     size_t counter = 0;
-    auto conn = signal.connect([&](unit) { ++counter; });
-    signal({});
+    auto conn = signal.connect([&] { ++counter; });
+    signal();
     ASSERT_EQ(counter, 1);
     signal.disconnect(std::move(conn));
-    signal({});
+    signal();
     ASSERT_EQ(counter, 1);
 }
 
 TEST(conn, manyUnit) {
-    signal<unit> signal;
+    signal<> signal;
     size_t counter1 = 0;
-    auto conn1 = signal.connect([&](unit) { ++counter1; });
+    auto conn1 = signal.connect([&]() { ++counter1; });
     size_t counter2 = 0;
-    auto conn2 = signal.connect([&](unit) { ++counter2; });
-    signal({});
+    auto conn2 = signal.connect([&]() { ++counter2; });
+    signal();
     EXPECT_EQ(counter1, 1);
     EXPECT_EQ(counter2, 1);
     signal.disconnect(std::move(conn1));
-    signal({});
+    signal();
     EXPECT_EQ(counter1, 1);
     EXPECT_EQ(counter2, 2);
     signal.disconnect(std::move(conn2));
@@ -66,14 +66,14 @@ TEST(conn, manyValue) {
 }
 
 TEST(conn, scope) {
-    signal<unit> signal;
+    signal<> signal;
     size_t counter = 0;
     {
-        scoped_conn<unit> scoped_conn{ signal, [&](unit) { ++counter; } };
-        signal({});
+        scoped_conn<> scoped_conn{ signal, [&] { ++counter; } };
+        signal();
         ASSERT_EQ(counter, 1);
     }
-    signal({});
+    signal();
     ASSERT_EQ(counter, 1);
 }
 

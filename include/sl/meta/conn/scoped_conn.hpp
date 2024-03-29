@@ -15,7 +15,7 @@ class scoped_conn : public finalizer<scoped_conn<T>> {
 public:
     template <typename F>
     scoped_conn(signal<T>& s, F&& f)
-        : finalizer<scoped_conn>{ [](scoped_conn& self) { self.signal_.disconnect(std::move(self.conn_)); } },
+        : finalizer<scoped_conn>{ [](scoped_conn& self) { self.signal_.get().disconnect(std::move(self.conn_)); } },
           signal_{ s }, conn_{ s.connect(std::forward<F>(f)) } {}
 
 private:

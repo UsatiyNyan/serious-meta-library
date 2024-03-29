@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "sl/meta/conn.hpp"
 #include "sl/meta/enum.hpp"
 #include "sl/meta/field.hpp"
 #include "sl/meta/func.hpp"

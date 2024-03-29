@@ -22,7 +22,7 @@ public:
     }
 
     template <typename F>
-    connection connect(F&& f) {
+    [[nodiscard]] connection connect(F&& f) {
         slots_.emplace_back(std::forward<F>(f));
         return std::prev(slots_.end());
     }

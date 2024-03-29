@@ -15,6 +15,6 @@ using slot = fu2::function_base<
     /*Capacity=*/fu2::capacity_default,
     /*IsThrowing=*/false,
     /*HasStrongExceptGuarantee=*/true,
-    /*Signatures=*/void(const Ts&...)>;
+    /*Signatures=*/void(Ts...)>;
 
 } // namespace sl::meta

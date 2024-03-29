@@ -5,8 +5,7 @@
 #pragma once
 
 
-#include "to_string.hpp"
-
+#include "sl/meta/enum/to_string.hpp"
 #include "sl/meta/match/match_map.hpp"
 
 #include <string_view>

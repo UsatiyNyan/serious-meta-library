@@ -4,8 +4,11 @@
 
 #include "sl/meta/match.hpp"
 
-#include <gtest/gtest.h>
+#include "fixture/lifecycle.hpp"
 
+#include <gtest/gtest.h>
+#include <tl/expected.hpp>
+#include <tl/optional.hpp>
 
 namespace sl::meta {
 
@@ -87,6 +90,99 @@ TEST(match, bimatchMap) {
     static_assert(m.key(2) == std::string_view{ "b" });
     static_assert(m.key(3) == std::string_view{ "c" });
     static_assert(m.key(4) == tl::nullopt);
+}
+
+TEST(match, pmatchVariant) {
+    {
+        const std::variant<int, std::string, double> variant = 42;
+        const auto result = variant
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  [](std::string) { return 1; },
+                                  [](double) { return 2; },
+                              };
+        EXPECT_EQ(result, 0);
+    }
+    {
+        const std::variant<int, std::string, double> variant = "42";
+        const auto result = variant
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  [](std::string) { return 1; },
+                                  [](double) { return 2; },
+                              };
+        EXPECT_EQ(result, 1);
+    }
+    {
+        const std::variant<int, std::string, double> variant = 42.0;
+        const auto result = variant
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  [](std::string) { return 1; },
+                                  [](double) { return 2; },
+                              };
+        EXPECT_EQ(result, 2);
+    }
+}
+
+TEST(match, pmatchVariantLifecycle) {
+    const auto guard = fixture::lifecycle::make_states_guard();
+
+    {
+        std::variant<int, fixture::lifecycle> variant = 42;
+        const auto result_int = variant
+                                | pmatch{
+                                      [](int) { return 0; },
+                                      [](fixture::lifecycle&) { return 1; },
+                                  };
+        EXPECT_EQ(result_int, 0);
+        EXPECT_EQ(fixture::lifecycle::states["variant"].size(), 0);
+
+        variant.emplace<fixture::lifecycle>("variant");
+
+        const auto result_lvalue = variant
+                                   | pmatch{
+                                         [](int) { return 0; },
+                                         [](fixture::lifecycle&) { return 1; },
+                                     };
+        EXPECT_EQ(result_lvalue, 1);
+        const std::vector expected_lvalue_states{ fixture::lifecycle::state::constructed };
+        EXPECT_EQ(fixture::lifecycle::states["variant"], expected_lvalue_states);
+
+        const auto result_copy = variant
+                                 | pmatch{
+                                       [](int) { return 0; },
+                                       [](fixture::lifecycle) { return 1; },
+                                   };
+        EXPECT_EQ(result_copy, 1);
+        const std::vector expected_copy_states{ fixture::lifecycle::state::constructed,
+                                                fixture::lifecycle::state::copy_constructed_from };
+        EXPECT_EQ(fixture::lifecycle::states["variant"], expected_copy_states);
+        const std::vector expected_tmp_copy_states{ fixture::lifecycle::state::copy_constructed,
+                                                    fixture::lifecycle::state::destructed };
+        EXPECT_EQ(fixture::lifecycle::states[fixture::lifecycle::copied_id("variant")], expected_tmp_copy_states);
+
+
+        const auto result_move = std::move(variant)
+                                 | pmatch{
+                                       [](int) { return 0; },
+                                       [](fixture::lifecycle) { return 1; },
+                                   };
+        EXPECT_EQ(result_move, 1);
+        const std::vector expected_move_states{ fixture::lifecycle::state::constructed,
+                                                fixture::lifecycle::state::copy_constructed_from,
+                                                fixture::lifecycle::state::move_constructed_from };
+        EXPECT_EQ(fixture::lifecycle::states["variant"], expected_move_states);
+        const std::vector expected_tmp_move_states{ fixture::lifecycle::state::move_constructed,
+                                                    fixture::lifecycle::state::destructed };
+        EXPECT_EQ(fixture::lifecycle::states[fixture::lifecycle::moved_id("variant")], expected_tmp_move_states);
+    }
+
+    const std::vector expected_states{ fixture::lifecycle::state::constructed,
+                                       fixture::lifecycle::state::copy_constructed_from,
+                                       fixture::lifecycle::state::move_constructed_from,
+                                       fixture::lifecycle::state::destructed };
+    EXPECT_EQ(fixture::lifecycle::states["variant"], expected_states);
 }
 
 } // namespace sl::meta

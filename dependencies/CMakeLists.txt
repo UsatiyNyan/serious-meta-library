@@ -9,4 +9,5 @@ sl_target_link_system_libraries(${PROJECT_NAME}
         INTERFACE
         function2::function2
         tl::optional
+        tl::expected
 )

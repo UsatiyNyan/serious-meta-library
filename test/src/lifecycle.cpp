@@ -21,7 +21,7 @@ void lifecycle::print_states() {
 
 lifecycle::lifecycle(std::string a_id) : id{ std::move(a_id) } { lifecycle::states[id].push_back(state::constructed); }
 
-lifecycle::lifecycle(const lifecycle& other) : id{ other.id + "_copied" } {
+lifecycle::lifecycle(const lifecycle& other) : id{ copied_id(other.id) } {
     lifecycle::states[other.id].push_back(state::copy_constructed_from);
     lifecycle::states[id].push_back(state::copy_constructed);
 }
@@ -32,7 +32,7 @@ lifecycle& lifecycle::operator=(const lifecycle& other) {
     return *this;
 }
 
-lifecycle::lifecycle(lifecycle&& other) : id{ other.id + "_moved" } {
+lifecycle::lifecycle(lifecycle&& other) : id{ moved_id(other.id) } {
     lifecycle::states[other.id].push_back(state::move_constructed_from);
     lifecycle::states[id].push_back(state::move_constructed);
 }

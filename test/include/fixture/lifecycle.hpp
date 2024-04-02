@@ -70,6 +70,9 @@ struct lifecycle {
     lifecycle& operator=(lifecycle&& other);
     ~lifecycle();
 
+    static std::string copied_id(const std::string& id) { return id + "_copied"; }
+    static std::string moved_id(const std::string& id) { return id + "_moved"; }
+
     std::string id;
 };
 

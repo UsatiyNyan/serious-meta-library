@@ -9,3 +9,4 @@
 #include "sl/meta/traits/is_mapping.hpp"
 #include "sl/meta/traits/is_range.hpp"
 #include "sl/meta/traits/is_specialization.hpp"
+#include "sl/meta/traits/treat_as.hpp"

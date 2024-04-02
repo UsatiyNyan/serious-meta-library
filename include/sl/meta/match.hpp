@@ -9,3 +9,6 @@
 
 #include "sl/meta/match/bimatch.hpp"
 #include "sl/meta/match/bimatch_map.hpp"
+
+#include "sl/meta/match/overloaded.hpp"
+#include "sl/meta/match/pmatch.hpp"

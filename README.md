@@ -23,5 +23,6 @@ For serious programmers.
 - "sl/meta/hash.hpp"
     - constexpr hash functions
 - "sl/meta/match.hpp"
-    - constexpr match statement and mapping
-    - can be bidirectional
+    - constexpr match statement and mapping, can be bidirectional
+    - constexpr pattern matching of typical "union" containers (variant/expected/optional/ptr)
+

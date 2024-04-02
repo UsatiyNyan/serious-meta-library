@@ -12,6 +12,7 @@ For serious programmers.
     - concepts and compile-time checks 
 - "sl/meta/lifetime.hpp"
     - stack-based resource lifetime management
+    - correct forwarding
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors
 - "sl/meta/optional.hpp"

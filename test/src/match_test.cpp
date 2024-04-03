@@ -162,7 +162,6 @@ TEST(match, pmatchVariantLifecycle) {
                                                     fixture::lifecycle::state::destructed };
         EXPECT_EQ(fixture::lifecycle::states[fixture::lifecycle::copied_id("variant")], expected_tmp_copy_states);
 
-
         const auto result_move = std::move(variant)
                                  | pmatch{
                                        [](int) { return 0; },
@@ -183,6 +182,160 @@ TEST(match, pmatchVariantLifecycle) {
                                        fixture::lifecycle::state::move_constructed_from,
                                        fixture::lifecycle::state::destructed };
     EXPECT_EQ(fixture::lifecycle::states["variant"], expected_states);
+}
+
+TEST(match, pmatchExpected) {
+    {
+        const tl::expected<int, std::string> expected = 42;
+        const auto result = expected
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  [](const std::string&) { return 1; },
+                              };
+        EXPECT_EQ(result, 0);
+    }
+    {
+        const tl::expected<int, std::string> expected = tl::unexpected("42");
+        const auto result = expected
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  [](const std::string&) { return 1; },
+                              };
+        EXPECT_EQ(result, 1);
+    }
+}
+
+TEST(match, pmatchOptional) {
+    {
+        const tl::optional<int> optional = 42;
+        const auto result = optional
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  []() { return 1; },
+                              };
+        EXPECT_EQ(result, 0);
+    }
+    {
+        const tl::optional<int> optional = tl::nullopt;
+        const auto result = optional
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  []() { return 1; },
+                              };
+        EXPECT_EQ(result, 1);
+    }
+}
+
+TEST(match, pmatchPtr) {
+    {
+        const int* ptr = new int(42);
+        defer ptr_delete{ [ptr] { delete ptr; } };
+
+        const auto result = ptr
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  []() { return 1; },
+                              };
+        EXPECT_EQ(result, 0);
+    }
+    {
+        const int* ptr = nullptr;
+        const auto result = ptr
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  []() { return 1; },
+                              };
+        EXPECT_EQ(result, 1);
+    }
+}
+
+TEST(match, pmatchPtrShared) {
+    {
+        const std::shared_ptr<int> ptr = std::make_shared<int>(42);
+        const auto result = ptr
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  []() { return 1; },
+                              };
+        EXPECT_EQ(result, 0);
+    }
+    {
+        const std::shared_ptr<int> ptr;
+        const auto result = ptr
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  []() { return 1; },
+                              };
+        EXPECT_EQ(result, 1);
+    }
+}
+
+TEST(match, pmatchPtrUnique) {
+    {
+        const std::unique_ptr<int> ptr = std::make_unique<int>(42);
+        const auto result = ptr
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  []() { return 1; },
+                              };
+        EXPECT_EQ(result, 0);
+    }
+    {
+        const std::unique_ptr<int> ptr;
+        const auto result = ptr
+                            | pmatch{
+                                  [](int) { return 0; },
+                                  []() { return 1; },
+                              };
+        EXPECT_EQ(result, 1);
+    }
+}
+
+TEST(match, pmatchPtrLifecycle) {
+    const auto guard = fixture::lifecycle::make_states_guard();
+    {
+        auto ptr = std::make_unique<fixture::lifecycle>("ptr");
+        const auto result_lvalue = ptr
+                                   | pmatch{
+                                         [](fixture::lifecycle&) { return 0; },
+                                         []() { return 1; },
+                                     };
+        EXPECT_EQ(result_lvalue, 0);
+        const std::vector expected_lvalue_states{ fixture::lifecycle::state::constructed };
+        EXPECT_EQ(fixture::lifecycle::states["ptr"], expected_lvalue_states);
+
+        const auto result_copy = ptr
+                                 | pmatch{
+                                       [](fixture::lifecycle) { return 0; },
+                                       []() { return 1; },
+                                   };
+        EXPECT_EQ(result_copy, 0);
+        const std::vector expected_copy_states{ fixture::lifecycle::state::constructed,
+                                                fixture::lifecycle::state::copy_constructed_from };
+        EXPECT_EQ(fixture::lifecycle::states["ptr"], expected_copy_states);
+        const std::vector expected_tmp_copy_states{ fixture::lifecycle::state::copy_constructed,
+                                                    fixture::lifecycle::state::destructed };
+        EXPECT_EQ(fixture::lifecycle::states[fixture::lifecycle::copied_id("ptr")], expected_tmp_copy_states);
+
+        const auto result_move = std::move(ptr)
+                                 | pmatch{
+                                       [](fixture::lifecycle) { return 0; },
+                                       []() { return 1; },
+                                   };
+        EXPECT_EQ(result_move, 0);
+        const std::vector expected_move_states{ fixture::lifecycle::state::constructed,
+                                                fixture::lifecycle::state::copy_constructed_from,
+                                                fixture::lifecycle::state::move_constructed_from };
+        EXPECT_EQ(fixture::lifecycle::states["ptr"], expected_move_states);
+        const std::vector expected_tmp_move_states{ fixture::lifecycle::state::move_constructed,
+                                                    fixture::lifecycle::state::destructed };
+        EXPECT_EQ(fixture::lifecycle::states[fixture::lifecycle::moved_id("ptr")], expected_tmp_move_states);
+    }
+    const std::vector expected_states{ fixture::lifecycle::state::constructed,
+                                       fixture::lifecycle::state::copy_constructed_from,
+                                       fixture::lifecycle::state::move_constructed_from,
+                                       fixture::lifecycle::state::destructed };
+    EXPECT_EQ(fixture::lifecycle::states["ptr"], expected_states);
 }
 
 } // namespace sl::meta

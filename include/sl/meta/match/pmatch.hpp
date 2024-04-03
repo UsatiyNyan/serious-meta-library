@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "sl/meta/lifetime/deref.hpp"
 #include "sl/meta/match/overloaded.hpp"
 #include "sl/meta/traits/treat_as.hpp"
 
@@ -25,7 +26,7 @@ public:
         if (v == nullptr) {
             return std::move(overloaded_)();
         }
-        return std::move(overloaded_)(forward_deref<T>(v));
+        return std::move(overloaded_)(deref<T>(std::forward<T>(v)));
     }
 
     template <treat_as_optional T>

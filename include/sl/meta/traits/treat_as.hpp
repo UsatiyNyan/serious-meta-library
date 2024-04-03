@@ -33,11 +33,13 @@ concept treat_as_variant = //
     };
 
 template <typename T, typename OriginalT = std::decay_t<T>>
-concept treat_as_ptr = //
-    std::is_pointer_v<OriginalT> //
-    || requires(T v) {
-           { v == nullptr } -> std::same_as<bool>;
-           { *v } -> std::convertible_to<typename OriginalT::element_type>;
-       };
+concept treat_as_smart_ptr = //
+    requires(T v) {
+        { v == nullptr } -> std::same_as<bool>;
+        { *v } -> std::convertible_to<typename OriginalT::element_type>;
+    };
+
+template <typename T, typename OriginalT = std::decay_t<T>>
+concept treat_as_ptr = std::is_pointer_v<OriginalT> || treat_as_smart_ptr<T>;
 
 } // namespace sl::meta

@@ -77,4 +77,32 @@ TEST(conn, scope) {
     ASSERT_EQ(counter, 1);
 }
 
+TEST(conn, property) {
+    property<std::string> string_property;
+    size_t counter = 0;
+    {
+        std::string_view from_changed;
+        scoped_conn scoped_conn{
+            string_property.changed(),
+            [&](std::string_view x) {
+                from_changed = x;
+                ++counter;
+            },
+        };
+        string_property.set("hello");
+        EXPECT_EQ(counter, 1);
+        EXPECT_EQ(from_changed, "hello");
+
+        string_property.set("world");
+        EXPECT_EQ(counter, 2);
+        EXPECT_EQ(from_changed, "world");
+
+        string_property.set("world");
+        EXPECT_EQ(counter, 2);
+        EXPECT_EQ(from_changed, "world");
+    }
+    string_property.set("!");
+    EXPECT_EQ(counter, 2);
+}
+
 } // namespace sl::meta

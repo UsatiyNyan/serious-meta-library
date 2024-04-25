@@ -4,10 +4,12 @@
 
 #pragma once
 
+#include "sl/meta/lifetime/unique.hpp"
+
 #include <function2/function2.hpp>
 
 namespace sl::meta {
-class defer {
+class defer : public unique {
     using defer_function_t = fu2::function_base<
         /*IsOwning=*/true,
         /*IsCopyable=*/false,
@@ -17,9 +19,6 @@ class defer {
         /*Signatures=*/void()>;
 
 public:
-    defer(const defer&) = delete;
-    defer& operator=(const defer&) = delete;
-
     defer(defer&& other) noexcept : f_(std::move(other.f_)) { other.f_ = nullptr; }
     defer& operator=(defer&& other) noexcept {
         if (this != &other) {

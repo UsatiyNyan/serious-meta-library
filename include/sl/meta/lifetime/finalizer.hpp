@@ -4,12 +4,13 @@
 
 #pragma once
 
+#include "sl/meta/lifetime/unique.hpp"
 #include <function2/function2.hpp>
 
 namespace sl::meta {
 // CRTP
 template <typename Self>
-class finalizer {
+class finalizer : public unique {
     using finalizer_function_t = fu2::function_base<
         /*IsOwning=*/true,
         /*IsCopyable=*/false,
@@ -19,9 +20,6 @@ class finalizer {
         /*Signatures=*/void(Self&)>;
 
 public:
-    finalizer(const finalizer&) = delete;
-    finalizer& operator=(const finalizer&) = delete;
-
     finalizer(finalizer&& other) noexcept : f_(std::move(other.f_)) { other.f_ = nullptr; }
     finalizer& operator=(finalizer&& other) noexcept {
         if (this != &other) {

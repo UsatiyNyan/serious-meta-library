@@ -5,6 +5,7 @@
 #pragma once
 
 #include "sl/meta/conn/signal.hpp"
+#include "sl/meta/lifetime/unique.hpp"
 
 #include <concepts>
 #include <utility>
@@ -13,8 +14,11 @@ namespace sl::meta {
 
 template <typename T>
     requires std::equality_comparable<T> && std::movable<T>
-class property {
+class property : public unique {
 public:
+    property() = default;
+    explicit property(T value) : value_{std::move(value)} {}
+
     [[nodiscard]] const T& get() const { return value_; }
     void set(T value) {
         if (value_ != value) {

@@ -5,13 +5,14 @@
 #pragma once
 
 #include "sl/meta/conn/slot.hpp"
+#include "sl/meta/lifetime/unique.hpp"
 
 #include <list>
 
 namespace sl::meta {
 
 template <typename... Ts>
-class signal {
+class signal : public unique {
 public:
     using connection = typename std::list<slot<Ts...>>::iterator;
 

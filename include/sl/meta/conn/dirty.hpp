@@ -36,6 +36,14 @@ public:
         return tl::nullopt;
     }
 
+    template <typename F, typename Ret = std::invoke_result_t<F, const T&>>
+        requires std::is_void_v<Ret>
+    void then(F&& f) {
+        if (std::exchange(is_changed_, false)) {
+            std::forward<F>(f)(std::cref(value_));
+        }
+    }
+
 private:
     T value_;
     bool is_changed_ = false;

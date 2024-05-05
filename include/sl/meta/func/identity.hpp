@@ -8,9 +8,11 @@
 
 namespace sl::meta {
 
-template <typename T>
-auto identity(T&& x) {
-    return std::forward<T>(x);
-}
+struct identity_t {
+    template <typename T>
+    constexpr auto operator()(T&& x) const { return std::forward<T>(x); }
+};
+
+constexpr identity_t identity;
 
 } // namespace sl::meta

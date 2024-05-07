@@ -4,10 +4,4 @@
 
 #pragma once
 
-#include <utility>
-
-namespace sl::meta {
-
-#define lift(f) [](auto&&... args) { return f(std::forward<decltype(args)>(args)...); }
-
-} // namespace sl::meta
+#define SL_META_LIFT(f) [](auto&&... args) { return f(std::forward<decltype(args)>(args)...); }

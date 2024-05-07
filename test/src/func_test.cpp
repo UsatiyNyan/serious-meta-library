@@ -15,7 +15,7 @@ TEST(func, pipelineEmpty) {
 
 TEST(func, pipeline) {
     constexpr auto p = pipeline{} //
-                           .then(lift(std::to_string))
+                           .then(SL_META_LIFT(std::to_string))
                            .then([](auto x) { return x + "abc"; })
                            .then([](auto x) { return x + x; });
     EXPECT_EQ(p(123), "123abc123abc");

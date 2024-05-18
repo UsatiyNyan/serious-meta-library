@@ -6,11 +6,28 @@
 
 #include <cstdint>
 #include <string_view>
-#include <utility>
 
 namespace sl::meta {
 
 namespace detail {
+
+template <typename T>
+struct fnv1a;
+
+template <>
+struct fnv1a<std::uint32_t> {
+    static constexpr std::uint32_t offset = 2166136261u;
+    static constexpr std::uint32_t prime = 16777619u;
+};
+
+template <>
+struct fnv1a<std::uint64_t> {
+    static constexpr std::uint64_t offset = 14695981039346656037ul;
+    static constexpr std::uint64_t prime = 1099511628211ul;
+};
+
+} // namespace detail
+
 
 /*
  * hash = offset_basis
@@ -19,55 +36,16 @@ namespace detail {
  *     hash = hash * FNV_prime
  * return hash
  * */
-
-template <typename T, T offset, T prime, std::size_t... idxs>
-constexpr T fnv1a(const char* s, std::index_sequence<idxs...>) {
+template <typename T>
+constexpr T fnv1a(std::string_view string_view) {
+    constexpr T offset = detail::fnv1a<T>::offset;
+    constexpr T prime = detail::fnv1a<T>::prime;
     T hash = offset;
-    ((hash = (hash ^ static_cast<T>(s[idxs])) * prime), ...);
+    for (auto c : string_view) {
+        hash ^= static_cast<T>(c);
+        hash *= prime;
+    }
     return hash;
-}
-
-template <typename T, T offset, T prime, std::size_t count>
-constexpr T fnv1a(const char* s) {
-    return fnv1a<T, offset, prime>(s, std::make_index_sequence<count - 1>());
-}
-
-template <std::size_t count>
-constexpr std::uint32_t fnv1a_32(const char* s) {
-    constexpr std::uint32_t FNV1A_32_OFFSET = 2166136261u;
-    constexpr std::uint32_t FNV1A_32_PRIME = 16777619u;
-
-    return detail::fnv1a<std::uint32_t, FNV1A_32_OFFSET, FNV1A_32_PRIME, count>(s);
-}
-
-template <std::size_t count>
-constexpr std::uint64_t fnv1a_64(const char* s) {
-    constexpr std::uint64_t FNV1A_64_OFFSET = 14695981039346656037ul;
-    constexpr std::uint64_t FNV1A_64_PRIME = 1099511628211ul;
-
-    return detail::fnv1a<std::uint64_t, FNV1A_64_OFFSET, FNV1A_64_PRIME, count>(s);
-}
-
-} // namespace detail
-
-template <std::size_t count>
-constexpr std::uint32_t fnv1a_32(const char (&s)[count]) {
-    return detail::fnv1a_32<count>(s);
-}
-
-template <std::size_t count>
-constexpr std::uint32_t fnv1a_32(const char s[count]) {
-    return detail::fnv1a_32<count>(s);
-}
-
-template <std::size_t count>
-constexpr std::uint64_t fnv1a_64(const char (&s)[count]) {
-    return detail::fnv1a_64<count>(s);
-}
-
-template <std::size_t count>
-constexpr std::uint64_t fnv1a_64(const char s[count]) {
-    return detail::fnv1a_64<count>(s);
 }
 
 } // namespace sl::meta

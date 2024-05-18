@@ -10,17 +10,13 @@ namespace sl::meta {
 
 constexpr char chars[] = "oraoraoraoraoraoraoraoraora";
 
-TEST(string, create) {
-    static_assert(string{chars}.chars == std::string_view{chars});
-}
+TEST(staticString, create) { static_assert(static_string{ chars }.string_view() == std::string_view{ chars }); }
 
-template <string value_>
+template <static_string value_>
 struct StringHolder {
-    static constexpr string value = value_;
+    static constexpr static_string value = value_;
 };
 
-TEST(string, asTemplateArg) {
-    static_assert(StringHolder<chars>::value.chars == std::string_view{chars});
-}
+TEST(staticString, asTemplateArg) { static_assert(StringHolder<chars>::value.string_view() == std::string_view{ chars }); }
 
 } // namespace sl::meta

@@ -9,11 +9,12 @@
 #include <function2/function2.hpp>
 
 namespace sl::meta {
+template <typename Capacity = fu2::capacity_default>
 class defer : public unique {
     using defer_function_t = fu2::function_base<
         /*IsOwning=*/true,
         /*IsCopyable=*/false,
-        /*Capacity=*/fu2::capacity_default,
+        /*Capacity=*/Capacity,
         /*IsThrowing=*/false,
         /*HasStrongExceptGuarantee=*/true,
         /*Signatures=*/void()>;
@@ -43,4 +44,7 @@ private:
 private:
     defer_function_t f_{};
 };
+
+template <typename F>
+defer(F) -> defer<fu2::capacity_can_hold<F>>;
 } // namespace sl::meta

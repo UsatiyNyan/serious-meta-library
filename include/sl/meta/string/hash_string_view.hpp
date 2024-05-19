@@ -22,7 +22,7 @@ constexpr hash_string_view operator""_hsv(const char* str, std::size_t len) {
 }
 
 struct hash_string_view_op {
-    constexpr auto operator()(const hash_string_view& value) { return value.hash; }
+    constexpr auto operator()(const hash_string_view& value) const { return value.hash; }
 };
 
 } // namespace sl::meta

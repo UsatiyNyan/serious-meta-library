@@ -13,6 +13,7 @@
 #include <vector>
 
 namespace sl::meta {
+
 template <
     typename Id,
     typename T,
@@ -60,7 +61,7 @@ public:
 
 private:
     std::vector<T, Alloc<T>> memory_;
-    tsl::robin_map<Id, std::size_t, Hash<Id>, Equal<Id>, Alloc<std::pair<Id, T>>> address_table_;
+    tsl::robin_map<Id, std::size_t, Hash<Id>, Equal<Id>, Alloc<std::pair<Id, std::size_t>>> address_table_;
     tl::optional<const persistent_storage&> parent_;
 };
 

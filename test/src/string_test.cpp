@@ -22,7 +22,7 @@ TEST(staticString, asTemplateArg) {
 }
 
 TEST(hashStringView, literal) {
-    static_assert("ora"_hsv.hash == 0x19fb8e1921bfa2bf);
+    static_assert("ora"_hsv.hash() == 0x19fb8e1921bfa2bf);
     static_assert("ora"_hsv == "ora"_hsv);
     static_assert("oraora"_hsv != "ora"_hsv);
 }

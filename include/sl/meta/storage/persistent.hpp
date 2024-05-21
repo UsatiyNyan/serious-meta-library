@@ -51,10 +51,12 @@ public:
         const auto [address_it, is_address_emplaced] = address_table_.try_emplace(id, new_address);
         auto result = std::make_pair(reference{ memory_, address_it.value() }, is_address_emplaced);
         if (is_address_emplaced) {
-            memory_.emplace_back(lazy_eval { std::forward<MakeT>(make_item) });
+            memory_.emplace_back(lazy_eval{ std::forward<MakeT>(make_item) });
         }
         return result;
     }
+
+    [[nodiscard]] const auto& memory() const { return memory_; }
 
 private:
     std::vector<T, Alloc<T>> memory_;

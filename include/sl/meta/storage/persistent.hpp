@@ -4,11 +4,13 @@
 
 #pragma once
 
-#include <type_traits>
-#include <vector>
+#include "sl/meta/lifetime/lazy_eval.hpp"
 
 #include <tl/optional.hpp>
 #include <tsl/robin_map.h>
+
+#include <type_traits>
+#include <vector>
 
 namespace sl::meta {
 template <
@@ -49,7 +51,7 @@ public:
         const auto [address_it, is_address_emplaced] = address_table_.try_emplace(id, new_address);
         auto result = std::make_pair(reference{ memory_, address_it.value() }, is_address_emplaced);
         if (is_address_emplaced) {
-            memory_.push_back(make_item());
+            memory_.emplace_back(lazy_eval { std::forward<MakeT>(make_item) });
         }
         return result;
     }

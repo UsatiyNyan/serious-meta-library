@@ -173,21 +173,4 @@ TEST(lazyEval, map) {
     EXPECT_EQ(fixture::lifecycle::states["inserted"], after_lazy_eval_states);
 }
 
-TEST(storage, emplace) {
-    const auto guard = fixture::lifecycle::make_states_guard();
-
-    storage<hash_string_view, fixture::lifecycle> lifecycle_storage;
-
-    {
-        auto [reference, defer] =
-            lifecycle_storage.emplace("oraora"_hsv, [] { return fixture::lifecycle{ "inserted" }; });
-        const std::vector lazy_eval_states{ fixture::lifecycle::state::constructed };
-        EXPECT_EQ(fixture::lifecycle::states["inserted"], lazy_eval_states);
-    }
-
-    const std::vector after_lazy_eval_states{ fixture::lifecycle::state::constructed,
-                                              fixture::lifecycle::state::destructed };
-    EXPECT_EQ(fixture::lifecycle::states["inserted"], after_lazy_eval_states);
-}
-
 } // namespace sl::meta

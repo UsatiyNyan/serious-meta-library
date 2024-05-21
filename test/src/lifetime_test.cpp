@@ -132,7 +132,7 @@ TEST(lifetime, forwardDerefSharedPtr) {
     EXPECT_EQ(fixture::lifecycle::states["ptr"], expected_states);
 };
 
-TEST(lazyEval, value) {
+TEST(lifetime, lazyEval) {
     const auto guard = fixture::lifecycle::make_states_guard();
 
     lazy_eval make_value{ [] { return fixture::lifecycle{ "value" }; } };
@@ -151,7 +151,7 @@ TEST(lazyEval, value) {
     EXPECT_EQ(fixture::lifecycle::states["value"], after_lazy_eval_states);
 }
 
-TEST(lazyEval, map) {
+TEST(lifetime, lazyEvalMap) {
     const auto guard = fixture::lifecycle::make_states_guard();
 
     {

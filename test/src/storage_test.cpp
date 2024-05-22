@@ -118,4 +118,86 @@ TEST(storage, persistentNesting) {
     EXPECT_EQ(fixture::lifecycle::states["outer"], after_inserted_states);
 }
 
+TEST(storage, uniqueString) {
+    unique_string_storage storage{ 128 };
+    ASSERT_TRUE(storage.memory().empty());
+
+    {
+        const auto maybe_entry = storage.lookup("oraora"_hsv);
+        ASSERT_FALSE(maybe_entry.has_value());
+    }
+
+    {
+        const auto [entry, is_emplaced] = storage.emplace("oraora"_hsv);
+        ASSERT_TRUE(is_emplaced);
+        ASSERT_EQ(entry.string_view(), "oraora");
+    }
+
+    ASSERT_EQ(storage.memory(), "oraora");
+
+    {
+        const auto maybe_entry = storage.lookup("oraora"_hsv);
+        ASSERT_TRUE(maybe_entry.has_value());
+        const auto& entry = maybe_entry.value();
+        ASSERT_EQ(entry.string_view(), "oraora");
+    }
+
+    {
+        const auto maybe_entry = storage.lookup("mudamuda"_hsv);
+        ASSERT_FALSE(maybe_entry.has_value());
+    }
+
+    {
+        const auto [entry, is_emplaced] = storage.emplace("mudamuda"_hsv);
+        ASSERT_TRUE(is_emplaced);
+        ASSERT_EQ(entry.string_view(), "mudamuda");
+    }
+
+    ASSERT_EQ(storage.memory(), "oraoramudamuda");
+
+    {
+        const auto maybe_entry = storage.lookup("oraora"_hsv);
+        ASSERT_TRUE(maybe_entry.has_value());
+        const auto& entry = maybe_entry.value();
+        ASSERT_EQ(entry.string_view(), "oraora");
+    }
+
+    {
+        const auto maybe_entry = storage.lookup("mudamuda"_hsv);
+        ASSERT_TRUE(maybe_entry.has_value());
+        const auto& entry = maybe_entry.value();
+        ASSERT_EQ(entry.string_view(), "mudamuda");
+    }
+}
+
+TEST(storage, uniqueStringNesting) {
+    unique_string_storage outer{ 128 };
+    (void)outer.emplace("oraora"_hsv);
+
+    {
+        unique_string_storage inner{ 128, outer };
+        (void)inner.emplace("mudamuda"_hsv);
+
+        {
+            const auto maybe_entry = inner.lookup("oraora"_hsv, 0);
+            ASSERT_FALSE(maybe_entry.has_value());
+        }
+
+        {
+            const auto maybe_entry = inner.lookup("oraora"_hsv);
+            ASSERT_TRUE(maybe_entry.has_value());
+            const auto& entry = maybe_entry.value();
+            ASSERT_EQ(entry.string_view(), "oraora");
+        }
+
+        {
+            const auto maybe_entry = inner.lookup("mudamuda"_hsv, 0);
+            ASSERT_TRUE(maybe_entry.has_value());
+            const auto& entry = maybe_entry.value();
+            ASSERT_EQ(entry.string_view(), "mudamuda");
+        }
+    }
+}
+
+
 } // namespace sl::meta

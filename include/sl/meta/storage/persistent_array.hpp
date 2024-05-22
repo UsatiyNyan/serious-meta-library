@@ -84,11 +84,7 @@ class persistent_array_storage<Id, T, Hash, Equal, Alloc>::reference {
 public:
     reference(const std::vector<T, Alloc<T>>& memory, cell cell) : memory_{ memory }, cell_{ cell } {}
 
-    // can also be used with std::string_view for example
-    template <typename View = std::span<T>>
-    View as() const {
-        return View{ &memory_[cell_.address], cell_.size };
-    }
+    [[nodiscard]] auto span() const { return std::span<T>{ &memory_.at(cell_.address), cell_.size }; }
 
 private:
     const std::vector<T, Alloc<T>>& memory_;

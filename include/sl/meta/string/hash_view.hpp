@@ -14,7 +14,7 @@ template <typename C>
 class basic_hash_string_view {
 public:
     explicit constexpr basic_hash_string_view(std::basic_string_view<C> sv)
-        : hash_{ fnv1a<std::uint64_t>(sv) }, sv_{ sv } {}
+        : sv_{ sv }, hash_{ fnv1a<std::uint64_t>(sv) } {}
 
     constexpr bool operator==(const basic_hash_string_view& other) const {
         return hash_ == other.hash_ && sv_ == other.sv_;
@@ -24,8 +24,8 @@ public:
     constexpr auto string_view() const { return sv_; }
 
 private:
-    std::uint64_t hash_;
     std::basic_string_view<C> sv_;
+    std::uint64_t hash_;
 };
 
 using hash_string_view = basic_hash_string_view<char>;

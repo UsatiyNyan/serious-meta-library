@@ -36,8 +36,8 @@ struct fnv1a<std::uint64_t> {
  *     hash = hash * FNV_prime
  * return hash
  * */
-template <typename T>
-constexpr T fnv1a(std::string_view string_view) {
+template <typename T, typename C>
+constexpr T fnv1a(std::basic_string_view<C> string_view) {
     constexpr T offset = detail::fnv1a<T>::offset;
     constexpr T prime = detail::fnv1a<T>::prime;
     T hash = offset;

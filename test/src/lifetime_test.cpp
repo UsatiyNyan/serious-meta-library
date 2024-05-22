@@ -5,7 +5,6 @@
 #include "sl/meta/lifetime.hpp"
 
 #include "fixture/lifecycle.hpp"
-#include "sl/meta/string/hash_string_view.hpp"
 
 #include <gtest/gtest.h>
 

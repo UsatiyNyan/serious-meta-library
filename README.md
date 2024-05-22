@@ -12,7 +12,8 @@ For serious programmers.
     - concepts and compile-time checks 
 - "sl/meta/lifetime.hpp"
     - stack-based resource lifetime management
-    - correct forwarding
+    - correct pointer forwarding
+    - lazy evaluation
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors
 - "sl/meta/optional.hpp"
@@ -25,4 +26,5 @@ For serious programmers.
 - "sl/meta/match.hpp"
     - constexpr match statement and mapping, can be bidirectional
     - constexpr pattern matching of typical "union" containers (variant/expected/optional/ptr)
-
+- "sl/meta/storage.hpp"
+    - persistent storage of items with unique identifiers

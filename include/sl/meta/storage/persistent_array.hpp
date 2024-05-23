@@ -12,6 +12,20 @@
 
 namespace sl::meta {
 
+template <typename T, template <typename> typename Alloc = std::allocator>
+class persistent_array {
+public:
+    persistent_array(const std::vector<T, Alloc<T>>& memory, std::size_t address, std::size_t size)
+        : memory_{ memory }, address_{ address }, size_{ size } {}
+
+    [[nodiscard]] auto span() const { return std::span<T>{ &memory_->at(address_), size_ }; }
+
+private:
+    const std::vector<T, Alloc<T>>& memory_;
+    std::size_t address_;
+    std::size_t size_;
+};
+
 template <
     typename Id,
     typename T,
@@ -25,7 +39,7 @@ class persistent_array_storage {
     };
 
 public:
-    class reference;
+    using reference = persistent_array<T, Alloc>;
 
 public:
     explicit persistent_array_storage(
@@ -69,26 +83,6 @@ private:
     std::vector<T, Alloc<T>> memory_;
     tsl::robin_map<Id, cell, Hash<Id>, Equal<Id>, Alloc<std::pair<Id, cell>>> cell_table_;
     tl::optional<const persistent_array_storage&> parent_;
-};
-
-template <
-    typename Id,
-    typename T,
-    template <typename>
-    typename Hash,
-    template <typename>
-    typename Equal,
-    template <typename>
-    typename Alloc>
-class persistent_array_storage<Id, T, Hash, Equal, Alloc>::reference {
-public:
-    reference(const std::vector<T, Alloc<T>>& memory, cell cell) : memory_{ memory }, cell_{ cell } {}
-
-    [[nodiscard]] auto span() const { return std::span<T>{ &memory_.at(cell_.address), cell_.size }; }
-
-private:
-    const std::vector<T, Alloc<T>>& memory_;
-    cell cell_;
 };
 
 } // namespace sl::meta

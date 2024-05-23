@@ -14,6 +14,19 @@
 
 namespace sl::meta {
 
+template <typename T, template <typename> typename Alloc = std::allocator>
+class persistent {
+public:
+    persistent(const std::vector<T, Alloc<T>>& memory, std::size_t address) : memory_{ &memory }, address_{ address } {}
+
+    const T* operator->() const { return &memory_->at(address_); }
+    const T& operator*() const { return memory_->at(address_); }
+
+private:
+    const std::vector<T, Alloc<T>>* memory_;
+    std::size_t address_;
+};
+
 template <
     typename Id,
     typename T,
@@ -22,7 +35,7 @@ template <
     template <typename> typename Alloc = std::allocator>
 class persistent_storage {
 public:
-    class reference;
+    using reference = persistent<T, Alloc>;
 
 public:
     explicit persistent_storage(std::size_t capacity, tl::optional<const persistent_storage&> parent = tl::nullopt)
@@ -63,27 +76,6 @@ private:
     std::vector<T, Alloc<T>> memory_;
     tsl::robin_map<Id, std::size_t, Hash<Id>, Equal<Id>, Alloc<std::pair<Id, std::size_t>>> address_table_;
     tl::optional<const persistent_storage&> parent_;
-};
-
-template <
-    typename Id,
-    typename T,
-    template <typename>
-    typename Hash,
-    template <typename>
-    typename Equal,
-    template <typename>
-    typename Alloc>
-class persistent_storage<Id, T, Hash, Equal, Alloc>::reference {
-public:
-    reference(const std::vector<T, Alloc<T>>& memory, std::size_t address) : memory_{ memory }, address_{ address } {}
-
-    const T* operator->() const { return &memory_.at(address_); }
-    const T& operator*() const { return memory_.at(address_); }
-
-private:
-    const std::vector<T, Alloc<T>>& memory_;
-    std::size_t address_;
 };
 
 } // namespace sl::meta

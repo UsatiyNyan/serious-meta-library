@@ -73,6 +73,10 @@ struct lifecycle {
     static std::string copied_id(const std::string& id) { return id + "_copied"; }
     static std::string moved_id(const std::string& id) { return id + "_moved"; }
 
+    bool operator==(const lifecycle&) const = default;
+    bool operator==(const std::string& other) const { return id == other; }
+    bool operator==(const std::string_view& other) const { return id == other; }
+
     std::string id;
 };
 

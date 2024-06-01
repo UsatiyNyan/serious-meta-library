@@ -14,9 +14,9 @@ namespace sl::meta {
 template <typename F, typename T = std::invoke_result_t<F>>
 class lazy_eval : public unique {
 public:
-    explicit lazy_eval(F f) : f_{ std::move(f) } {}
+    constexpr explicit lazy_eval(F f) : f_{ std::move(f) } {}
 
-    operator T() && { return f_(); }
+    [[nodiscard]] constexpr operator T() && { return f_(); }
 
 private:
     F f_;

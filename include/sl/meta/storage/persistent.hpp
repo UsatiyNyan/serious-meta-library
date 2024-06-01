@@ -13,7 +13,6 @@
 #include <vector>
 
 namespace sl::meta {
-
 namespace detail {
 
 template <typename T, template <typename> typename Alloc, bool is_const>
@@ -25,10 +24,10 @@ public:
     persistent(memory_t& memory, std::size_t address) : memory_{ &memory }, address_{ address } {}
 
     const T* operator->() const { return &memory_->at(address_); }
-    const T& operator*() const { return memory_->at(address_); }
+    [[nodiscard]] const T& operator*() const { return memory_->at(address_); }
 
     deref_t* operator->() { return &memory_->at(address_); }
-    deref_t& operator*() { return memory_->at(address_); }
+    [[nodiscard]] deref_t& operator*() { return memory_->at(address_); }
 
 private:
     memory_t* memory_;

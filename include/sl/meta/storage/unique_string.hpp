@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "sl/meta/lifetime/immovable.hpp"
 #include "sl/meta/string/hash_view.hpp"
 
 #include <tl/optional.hpp>
@@ -53,7 +54,7 @@ template <
     typename C,
     template <typename> typename Traits = std::char_traits,
     template <typename> typename Alloc = std::allocator>
-class basic_unique_string_storage {
+class basic_unique_string_storage : public immovable {
     struct cell {
         std::size_t address;
         std::size_t size;

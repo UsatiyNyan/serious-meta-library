@@ -5,6 +5,7 @@
 #pragma once
 
 #include "sl/meta/func/const.hpp"
+#include "sl/meta/lifetime/immovable.hpp"
 
 #include <range/v3/size.hpp>
 #include <tl/optional.hpp>
@@ -47,7 +48,7 @@ template <
     template <typename> typename Hash = std::hash,
     template <typename> typename Equal = std::equal_to,
     template <typename> typename Alloc = std::allocator>
-class persistent_array_storage {
+class persistent_array_storage : public immovable {
     struct cell {
         std::size_t address;
         std::size_t size;

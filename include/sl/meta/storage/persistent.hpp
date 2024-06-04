@@ -5,6 +5,7 @@
 #pragma once
 
 #include "sl/meta/func/const.hpp"
+#include "sl/meta/lifetime/immovable.hpp"
 #include "sl/meta/lifetime/lazy_eval.hpp"
 
 #include <tl/optional.hpp>
@@ -48,7 +49,7 @@ template <
     template <typename> typename Hash = std::hash,
     template <typename> typename Equal = std::equal_to,
     template <typename> typename Alloc = std::allocator>
-class persistent_storage {
+class persistent_storage : public immovable {
 public:
     explicit persistent_storage(std::size_t capacity, tl::optional<persistent_storage&> parent = tl::nullopt)
         : memory_{}, address_table_{ capacity }, parent_{ parent } {

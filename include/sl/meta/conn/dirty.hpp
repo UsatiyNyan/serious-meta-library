@@ -44,6 +44,13 @@ public:
         }
     }
 
+    tl::optional<T> release() {
+        if (is_changed_) {
+            return std::move(value_);
+        }
+        return tl::nullopt;
+    }
+
 private:
     T value_{};
     bool is_changed_ = false;

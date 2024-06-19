@@ -12,7 +12,6 @@
 #include <string_view>
 #include <type_traits>
 
-
 namespace sl::meta {
 namespace detail {
 
@@ -34,7 +33,7 @@ constexpr auto make_enum_match_map() {
     return make_match_map<std::string_view, EnumT>([](auto match) {
         for (EnumT e = EnumT{}; e != EnumT::ENUM_END;
              e = static_cast<EnumT>(static_cast<std::underlying_type_t<EnumT>>(e) + 1)) {
-            constexpr std::string_view e_str = enum_to_str(e);
+            std::string_view e_str = enum_to_str(e);
             if (e_str.empty()) {
                 continue;
             }

@@ -37,6 +37,7 @@ public:
         return enum_flag{ static_cast<underlying_type>(value_ ^ other.value_) };
     }
     constexpr enum_flag operator~() const { return enum_flag{ static_cast<underlying_type>(~value_) }; }
+    constexpr bool operator==(enum_flag other) const { return value_ == other.value_; }
 
 private:
     underlying_type value_;

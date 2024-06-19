@@ -50,6 +50,23 @@ TEST(enum, flag) {
     static_assert(flag011 & flag001);
     static_assert(flag011 & flag010);
     static_assert(!(flag011 & flag100));
+
+    constexpr int iflag000 = 0;
+    constexpr int iflag001 = 0x0001;
+    constexpr int iflag010 = 0x0002;
+    constexpr int iflag100 = 0x0004;
+    constexpr auto iflag011 = iflag001 | iflag010;
+
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag000) } == flag000);
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag001) } == flag001);
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag010) } == flag010);
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag100) } == flag100);
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag011) } == flag011);
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag011) } != flag000);
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag011) } != flag001);
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag011) } != flag010);
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag011) } != flag100);
+    static_assert(enum_flag<TestFlagEnum>{ static_cast<std::uint8_t>(iflag001) } != flag011);
 }
 
 } // namespace sl::meta

@@ -19,7 +19,7 @@ namespace sl::meta {
 template <typename... Fs>
 class pmatch {
 public:
-    explicit pmatch(Fs&&... fs) : overloaded_{ std::forward<Fs>(fs)... } {}
+    constexpr explicit pmatch(Fs&&... fs) : overloaded_{ std::forward<Fs>(fs)... } {}
 
     template <treat_as_ptr T>
     constexpr auto operator()(T&& v) && {

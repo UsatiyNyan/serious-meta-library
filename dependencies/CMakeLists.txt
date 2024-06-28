@@ -10,6 +10,10 @@ cpmaddpackage(
         NAME tsl-robin-map
         GIT_REPOSITORY "git@github.com:Tessil/robin-map"
         GIT_TAG v1.3.0)
+cpmaddpackage(
+        NAME libassert
+        GIT_REPOSITORY "git@github.com:jeremy-rifkin/libassert.git"
+        GIT_TAG v2.0.1)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/tl.cmake")
 
@@ -20,4 +24,5 @@ sl_target_link_system_libraries(${PROJECT_NAME}
         tl::expected
         range-v3::range-v3
         tsl::robin_map
+        libassert::assert
 )

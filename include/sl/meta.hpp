@@ -9,6 +9,7 @@
 #include "sl/meta/field.hpp"
 #include "sl/meta/func.hpp"
 #include "sl/meta/hash.hpp"
+#include "sl/meta/intrusive.hpp"
 #include "sl/meta/lifetime.hpp"
 #include "sl/meta/match.hpp"
 #include "sl/meta/optional.hpp"

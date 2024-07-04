@@ -33,7 +33,10 @@ public:
     intrusive_forward_list& operator=(const intrusive_forward_list&) = delete;
 
     intrusive_forward_list(intrusive_forward_list&& other) noexcept : m_{ std::exchange(other.m_, m_type{}) } {}
-    intrusive_forward_list& operator=(intrusive_forward_list&& other) { m_ = std::exchange(other.m_, m_type{}); }
+    intrusive_forward_list& operator=(intrusive_forward_list&& other) {
+        m_ = std::exchange(other.m_, m_type{});
+        return *this;
+    }
 
     void push_back(node_type* node) {
         DEBUG_ASSERT(node != nullptr);

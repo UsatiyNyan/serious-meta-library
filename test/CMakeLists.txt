@@ -1,9 +1,8 @@
-sl_gtest_prologue(v1.13.0)
-
 add_library(${PROJECT_NAME}_fixture STATIC src/lifecycle.cpp)
 target_include_directories(${PROJECT_NAME}_fixture PUBLIC include)
 target_link_libraries(${PROJECT_NAME}_fixture PUBLIC ${PROJECT_NAME})
 
+sl_gtest_prologue(v1.13.0)
 sl_add_gtest(${PROJECT_NAME}_fixture meta)
 sl_add_gtest(${PROJECT_NAME}_fixture string)
 sl_add_gtest(${PROJECT_NAME}_fixture traits)

@@ -119,16 +119,17 @@ class intrusive_forward_list<T>::iterator {
     using qualified_node_type = add_const_if_t<node_type, is_const>;
 
     friend class intrusive_forward_list<T>;
-    explicit iterator(qualified_node_type* node) : node_{ node } {}
+    explicit iterator(qualified_node_type* node) : node_{ node }, next_{ maybe_next(node_) } {}
 
 public:
     auto operator++() {
-        node_ = node_->intrusive_next;
+        node_ = next_;
+        next_ = maybe_next(node_);
         return *this;
     }
     auto operator++(int) {
-        iterator tmp{ node_ };
-        node_ = node_->intrusive_next;
+        iterator tmp = *this;
+        operator++();
         return tmp;
     }
 
@@ -141,7 +142,13 @@ public:
     }
 
 private:
+    static qualified_node_type* maybe_next(qualified_node_type* node) {
+        return node == nullptr ? nullptr : node->intrusive_next;
+    }
+
+private:
     qualified_node_type* node_;
+    qualified_node_type* next_;
 };
 
 } // namespace sl::meta

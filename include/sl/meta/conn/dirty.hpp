@@ -6,53 +6,39 @@
 
 #include "sl/meta/lifetime/unique.hpp"
 
+#include <libassert/assert.hpp>
 #include <tl/optional.hpp>
-
-#include <functional>
-#include <utility>
 
 namespace sl::meta {
 
 template <typename T>
 class dirty : public unique {
 public:
-    constexpr dirty() = default;
-    constexpr explicit dirty(T value, bool is_changed = true) : value_{ std::move(value) }, is_changed_{ is_changed } {}
+    constexpr explicit dirty() = default;
+    constexpr explicit dirty(T value) : value_{ std::move(value) }, is_changed_{ true } {}
 
-    [[nodiscard]] constexpr const T& get() const { return value_; }
+    [[nodiscard]] constexpr tl::optional<const T&> get() const {
+        if (!value_.has_value()) {
+            return tl::nullopt;
+        }
+        return value_.value();
+    }
+    // would give value if it was changed, and mark it as unchanged for next "relase", until next "set"
+    [[nodiscard]] constexpr tl::optional<const T&> release() {
+        if (!std::exchange(is_changed_, false)) {
+            return tl::nullopt;
+        }
+        DEBUG_ASSERT(value_.has_value(), "invariant");
+        return value_.value();
+    }
+
     constexpr void set(T value) {
-        if (value_ != value) {
-            value_ = std::move(value);
-            is_changed_ = true;
-        }
-    }
-
-    template <typename F, typename Ret = std::invoke_result_t<F, const T&>>
-        requires(!std::is_void_v<Ret>)
-    constexpr tl::optional<Ret> then(F&& f) {
-        if (std::exchange(is_changed_, false)) {
-            return std::forward<F>(f)(std::cref(value_));
-        }
-        return tl::nullopt;
-    }
-
-    template <typename F, typename Ret = std::invoke_result_t<F, const T&>>
-        requires std::is_void_v<Ret>
-    constexpr void then(F&& f) {
-        if (std::exchange(is_changed_, false)) {
-            std::forward<F>(f)(std::cref(value_));
-        }
-    }
-
-    tl::optional<T> release() {
-        if (is_changed_) {
-            return std::move(value_);
-        }
-        return tl::nullopt;
+        value_.emplace(std::move(value));
+        is_changed_ = true;
     }
 
 private:
-    T value_{};
+    tl::optional<T> value_{};
     bool is_changed_ = false;
 };
 

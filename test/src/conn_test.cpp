@@ -109,33 +109,33 @@ TEST(conn, dirty) {
     dirty<std::string> dirty_string{ "hello" };
     EXPECT_EQ(dirty_string.get(), "hello");
     {
-        const auto identity_value = dirty_string.then(identity);
-        ASSERT_TRUE(identity_value.has_value());
-        EXPECT_EQ(identity_value.value(), "hello");
+        const auto changed_value = dirty_string.release();
+        ASSERT_TRUE(changed_value.has_value());
+        EXPECT_EQ(changed_value.value(), "hello");
     }
 
     dirty<std::string> dirty_string_empty;
-    EXPECT_EQ(dirty_string_empty.get(), "");
-    EXPECT_FALSE(dirty_string_empty.then(identity).has_value());
+    EXPECT_EQ(dirty_string_empty.get(), tl::nullopt);
+    EXPECT_FALSE(dirty_string_empty.release().has_value());
 
     dirty_string_empty.set("hello");
     EXPECT_EQ(dirty_string_empty.get(), "hello");
     {
-        const auto identity_value = dirty_string_empty.then(identity);
-        ASSERT_TRUE(identity_value.has_value());
-        EXPECT_EQ(identity_value.value(), "hello");
+        const auto changed_value = dirty_string_empty.release();
+        ASSERT_TRUE(changed_value.has_value());
+        EXPECT_EQ(changed_value.value(), "hello");
     }
 
     dirty_string_empty.set("hello");
     EXPECT_EQ(dirty_string_empty.get(), "hello");
-    EXPECT_FALSE(dirty_string_empty.then(identity).has_value());
+    EXPECT_TRUE(dirty_string_empty.release().has_value()) << "mark as changed even if value is the same";
 
     dirty_string_empty.set("world");
     EXPECT_EQ(dirty_string_empty.get(), "world");
     {
-        const auto identity_value = dirty_string_empty.then(identity);
-        ASSERT_TRUE(identity_value.has_value());
-        EXPECT_EQ(identity_value.value(), "world");
+        const auto changed_value = dirty_string_empty.release();
+        ASSERT_TRUE(changed_value.has_value());
+        EXPECT_EQ(changed_value.value(), "world");
     }
 }
 

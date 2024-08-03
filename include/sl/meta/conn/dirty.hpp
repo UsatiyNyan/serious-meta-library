@@ -37,6 +37,12 @@ public:
         is_changed_ = true;
     }
 
+    constexpr void set_if_ne(T value) {
+        if (value_ != value) {
+            set(std::move(value));
+        }
+    }
+
 private:
     tl::optional<T> value_{};
     bool is_changed_ = false;

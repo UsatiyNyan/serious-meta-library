@@ -7,6 +7,8 @@
 #include "sl/meta/lifetime/immovable.hpp"
 #include "sl/meta/string/hash_view.hpp"
 
+#include <libassert/assert.hpp>
+#include <tl/expected.hpp>
 #include <tl/optional.hpp>
 #include <tsl/robin_map.h>
 
@@ -91,9 +93,10 @@ public:
     }
 
     // Does not lookup in parents before inserting.
-    [[nodiscard]] std::pair<reference, bool> emplace(basic_hash_string_view<C> str_id) {
+    // returns: pair<reference, true if inserted|false if assigned>
+    [[nodiscard]] tl::expected<reference, reference> emplace(basic_hash_string_view<C> str_id) {
         if (auto maybe_reference = lookup(str_id, 0)) {
-            return std::make_pair(std::move(maybe_reference).value(), false);
+            return tl::make_unexpected(std::move(maybe_reference).value());
         }
 
         const auto sv = str_id.string_view();
@@ -104,14 +107,18 @@ public:
         memory_.append(sv);
         const reference key_reference{ memory_, new_cell.address, new_cell.size, hash };
         const auto [cell_it, is_cell_emplaced] = cell_table_.try_emplace(key_reference, new_cell);
+        const auto& cell = cell_it.value();
+        DEBUG_ASSERT(
+            is_cell_emplaced, "cell was not found in lookup previously, should not ever happen", sv, new_cell, cell
+        );
 
-        // handle ambiguous case, should not ever happen
+        // handle ambiguous case
         if (!is_cell_emplaced) [[unlikely]] {
             memory_.erase(memory_.size() - sv.size());
-            return std::make_pair(reference{ memory_, cell_it.value().address, cell_it.value().size, hash }, false);
+            return tl::make_unexpected(reference{ memory_, cell.address, cell.size, hash });
         }
 
-        return std::make_pair(key_reference, true);
+        return key_reference;
     }
 
     [[nodiscard]] const auto& memory() const { return memory_; }

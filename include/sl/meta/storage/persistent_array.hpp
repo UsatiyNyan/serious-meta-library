@@ -8,6 +8,7 @@
 #include "sl/meta/lifetime/immovable.hpp"
 
 #include <range/v3/size.hpp>
+#include <tl/expected.hpp>
 #include <tl/optional.hpp>
 #include <tsl/robin_map.h>
 
@@ -55,6 +56,10 @@ class persistent_array_storage : public immovable {
     };
 
 public:
+    using reference = persistent_array<T, Alloc>;
+    using const_reference = const_persistent_array<T, Alloc>;
+
+public:
     explicit persistent_array_storage(
         std::size_t capacity,
         tl::optional<persistent_array_storage&> parent = tl::nullopt
@@ -63,20 +68,21 @@ public:
         memory_.reserve(capacity);
     }
 
-    [[nodiscard]] tl::optional<const_persistent_array<T, Alloc>>
+    [[nodiscard]] tl::optional<const_reference>
         lookup(const Id& item_id, std::size_t parent_recursion_limit = std::numeric_limits<std::size_t>::max()) const {
         return lookup_impl(*this, item_id, parent_recursion_limit);
     }
 
-    [[nodiscard]] tl::optional<persistent_array<T, Alloc>>
+    [[nodiscard]] tl::optional<reference>
         lookup(const Id& item_id, std::size_t parent_recursion_limit = std::numeric_limits<std::size_t>::max()) {
         return lookup_impl(*this, item_id, parent_recursion_limit);
     }
 
     // Does not lookup in parents before inserting.
     // No exceptions pls, they are not handled.
+    // returns: pair<reference, true if inserted|false if assigned>
     template <typename Range>
-    [[nodiscard]] std::pair<persistent_array<T, Alloc>, bool> emplace(const Id& id, Range&& range) {
+    [[nodiscard]] tl::expected<reference, reference> emplace(const Id& id, Range&& range) {
         const auto [cell_it, is_cell_emplaced] = cell_table_.try_emplace(
             id,
             cell{
@@ -85,11 +91,12 @@ public:
             }
         );
         const cell& cell = cell_it.value();
-        auto result = std::make_pair(persistent_array<T, Alloc>{ memory_, cell.address, cell.size }, is_cell_emplaced);
-        if (is_cell_emplaced) {
-            memory_.insert(memory_.end(), ranges::begin(range), ranges::end(range));
+        reference reference{ memory_, cell.address, cell.size };
+        if (!is_cell_emplaced) {
+            return tl::make_unexpected(reference);
         }
-        return result;
+        memory_.insert(memory_.end(), ranges::begin(range), ranges::end(range));
+        return reference;
     }
 
     [[nodiscard]] const auto& memory() const { return memory_; }

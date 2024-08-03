@@ -22,10 +22,10 @@ TEST(storage, persistent) {
         const std::string key{ "oraora" };
 
         {
-            const auto [reference, is_emplaced] =
-                lifecycle_storage.emplace(key, [] { return fixture::lifecycle{ "inserted" }; });
+            const auto emplace_result = lifecycle_storage.emplace(key, [] { return fixture::lifecycle{ "inserted" }; });
+            ASSERT_TRUE(emplace_result.has_value());
 
-            ASSERT_TRUE(is_emplaced);
+            const auto& reference = emplace_result.value();
             EXPECT_EQ(reference->id, "inserted");
             const std::vector inserted_states{ fixture::lifecycle::state::constructed };
             EXPECT_EQ(fixture::lifecycle::states["inserted"], inserted_states);
@@ -42,10 +42,11 @@ TEST(storage, persistent) {
         }
 
         {
-            const auto [reference, is_emplaced] =
+            const auto emplace_result =
                 lifecycle_storage.emplace(key, [] { return fixture::lifecycle{ "not_inserted" }; });
+            ASSERT_FALSE(emplace_result.has_value());
 
-            ASSERT_FALSE(is_emplaced);
+            const auto& reference = emplace_result.error();
             EXPECT_EQ(reference->id, "inserted");
             const std::vector<fixture::lifecycle::state> not_inserted_states;
             EXPECT_EQ(fixture::lifecycle::states["not_inserted"], not_inserted_states);
@@ -54,10 +55,11 @@ TEST(storage, persistent) {
 
         {
             const std::string other_key{ "mudamuda" };
-            const auto [reference, is_emplaced] =
+            const auto emplace_result =
                 lifecycle_storage.emplace(other_key, [] { return fixture::lifecycle{ "also_inserted" }; });
+            ASSERT_TRUE(emplace_result.has_value());
 
-            ASSERT_TRUE(is_emplaced);
+            const auto& reference = emplace_result.value();
             EXPECT_EQ(reference->id, "also_inserted");
             const std::vector inserted_states{ fixture::lifecycle::state::constructed };
             EXPECT_EQ(fixture::lifecycle::states["also_inserted"], inserted_states);
@@ -158,10 +160,11 @@ TEST(storage, persistentArray) {
         const std::string key{ "oraora" };
 
         {
-            const auto [reference, is_emplaced] =
+            const auto emplace_result =
                 lifecycle_storage.emplace(key, persistent_array_producer(inserted_persistent_array));
+            ASSERT_TRUE(emplace_result.has_value());
 
-            ASSERT_TRUE(is_emplaced);
+            const auto& reference = emplace_result.value();
             EXPECT_TRUE(ranges_eq(reference.span(), inserted_persistent_array)) << persistent_array_format(reference);
             const std::vector inserted_states{ fixture::lifecycle::state::constructed };
             EXPECT_EQ(fixture::lifecycle::states["inserted1"], inserted_states);
@@ -170,8 +173,8 @@ TEST(storage, persistentArray) {
 
         {
             const auto maybe_reference = lifecycle_storage.lookup(key);
-
             ASSERT_TRUE(maybe_reference.has_value());
+
             const auto& reference = maybe_reference.value();
             EXPECT_TRUE(ranges_eq(reference.span(), inserted_persistent_array));
             const std::vector inserted_states{ fixture::lifecycle::state::constructed };
@@ -183,10 +186,11 @@ TEST(storage, persistentArray) {
             constexpr std::array<std::string_view, 1> not_inserted_persistent_array{
                 "not_inserted1",
             };
-            const auto [reference, is_emplaced] =
+            const auto emplace_result =
                 lifecycle_storage.emplace(key, persistent_array_producer(not_inserted_persistent_array));
+            ASSERT_FALSE(emplace_result.has_value());
 
-            ASSERT_FALSE(is_emplaced);
+            const auto& reference = emplace_result.error();
             EXPECT_TRUE(ranges_eq(reference.span(), inserted_persistent_array));
             const std::vector<fixture::lifecycle::state> not_inserted_states;
             EXPECT_EQ(fixture::lifecycle::states["not_inserted1"], not_inserted_states);
@@ -194,10 +198,11 @@ TEST(storage, persistentArray) {
 
         {
             const std::string other_key{ "mudamuda" };
-            const auto [reference, is_emplaced] =
+            const auto emplace_result =
                 lifecycle_storage.emplace(other_key, persistent_array_producer(also_inserted_persistent_array));
+            ASSERT_TRUE(emplace_result.has_value());
 
-            ASSERT_TRUE(is_emplaced);
+            const auto& reference = emplace_result.value();
             EXPECT_TRUE(ranges_eq(reference.span(), also_inserted_persistent_array));
             const std::vector inserted_states{ fixture::lifecycle::state::constructed };
             EXPECT_EQ(fixture::lifecycle::states["also_inserted1"], inserted_states);
@@ -282,8 +287,9 @@ TEST(storage, uniqueString) {
     }
 
     {
-        const auto [entry, is_emplaced] = storage.emplace("oraora"_hsv);
-        ASSERT_TRUE(is_emplaced);
+        const auto emplace_result = storage.emplace("oraora"_hsv);
+        ASSERT_TRUE(emplace_result.has_value());
+        const auto& entry = emplace_result.value();
         ASSERT_EQ(entry.string_view(), "oraora");
     }
 
@@ -302,8 +308,9 @@ TEST(storage, uniqueString) {
     }
 
     {
-        const auto [entry, is_emplaced] = storage.emplace("mudamuda"_hsv);
-        ASSERT_TRUE(is_emplaced);
+        const auto emplace_result = storage.emplace("mudamuda"_hsv);
+        ASSERT_TRUE(emplace_result.has_value());
+        const auto& entry = emplace_result.value();
         ASSERT_EQ(entry.string_view(), "mudamuda");
     }
 

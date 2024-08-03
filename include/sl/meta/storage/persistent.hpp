@@ -8,6 +8,7 @@
 #include "sl/meta/lifetime/immovable.hpp"
 #include "sl/meta/lifetime/lazy_eval.hpp"
 
+#include <tl/expected.hpp>
 #include <tl/optional.hpp>
 #include <tsl/robin_map.h>
 
@@ -51,33 +52,54 @@ template <
     template <typename> typename Alloc = std::allocator>
 class persistent_storage : public immovable {
 public:
+    using reference = persistent<T, Alloc>;
+    using const_reference = const_persistent<T, Alloc>;
+
+public:
     explicit persistent_storage(std::size_t capacity, tl::optional<persistent_storage&> parent = tl::nullopt)
         : memory_{}, address_table_{ capacity }, parent_{ parent } {
         memory_.reserve(capacity);
     }
 
-    [[nodiscard]] tl::optional<const_persistent<T, Alloc>>
+    [[nodiscard]] tl::optional<const_reference>
         lookup(const Id& item_id, std::size_t parent_recursion_limit = std::numeric_limits<std::size_t>::max()) const {
         return lookup_impl(*this, item_id, parent_recursion_limit);
     }
 
-    [[nodiscard]] tl::optional<persistent<T, Alloc>>
+    [[nodiscard]] tl::optional<reference>
         lookup(const Id& item_id, std::size_t parent_recursion_limit = std::numeric_limits<std::size_t>::max()) {
         return lookup_impl(*this, item_id, parent_recursion_limit);
     }
 
     // Does not lookup in parents before inserting.
     // No exceptions pls, they are not handled.
+    // returns: pair<reference, true if inserted|false if assigned>
     template <typename MakeT>
         requires std::is_same_v<std::invoke_result_t<MakeT>, T>
-    [[nodiscard]] std::pair<persistent<T, Alloc>, bool> emplace(const Id& id, MakeT&& make_item) {
+    [[nodiscard]] tl::expected<reference, reference> emplace(const Id& id, MakeT&& make_item) {
         const std::size_t new_address = memory_.size();
         const auto [address_it, is_address_emplaced] = address_table_.try_emplace(id, new_address);
-        auto result = std::make_pair(persistent<T, Alloc>{ memory_, address_it.value() }, is_address_emplaced);
-        if (is_address_emplaced) {
-            memory_.emplace_back(lazy_eval{ std::forward<MakeT>(make_item) });
+        reference reference{ memory_, address_it.value() };
+        if (!is_address_emplaced) {
+            return tl::make_unexpected(reference);
         }
-        return result;
+        memory_.emplace_back(lazy_eval{ std::forward<MakeT>(make_item) });
+        return reference;
+    }
+
+    // Does not lookup in parents before inserting.
+    // returns: pair<reference, true if inserted|false if assigned>
+    template <typename U>
+    [[nodiscard]] tl::expected<reference, reference> insert(const Id& id, U&& value) {
+        const std::size_t new_address = memory_.size();
+        const auto [address_it, is_address_emplaced] = address_table_.try_emplace(id, new_address);
+        reference reference{ memory_, address_it.value() };
+        if (is_address_emplaced) {
+            memory_.emplace_back(std::forward<U>(value));
+            return reference;
+        }
+        *reference = std::forward<U>(value);
+        return tl::make_unexpected(reference);
     }
 
     [[nodiscard]] const auto& memory() const { return memory_; }

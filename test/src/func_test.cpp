@@ -5,6 +5,7 @@
 #include "sl/meta/func.hpp"
 
 #include <gtest/gtest.h>
+#include <tl/expected.hpp>
 
 namespace sl::meta {
 
@@ -20,6 +21,11 @@ TEST(func, pipeline) {
                            .then([](auto x) { return x + x; });
     EXPECT_EQ(p(123), "123abc123abc");
     EXPECT_EQ(p(10.1f), "10.100000abc10.100000abc");
+}
+
+TEST(func, undefined) {
+    tl::expected<unit, undefined> never_error;
+    never_error = unit{};
 }
 
 } // namespace sl::meta

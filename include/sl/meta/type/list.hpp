@@ -26,6 +26,6 @@ template <typename... Ts>
 using head_t = typename detail::head<Ts...>::type;
 
 template <typename T, typename... Ts>
-constexpr bool are_same_v = (std::is_same_v<T, Ts> && ...);
+constexpr bool are_same_v = (std::is_same_v<T, Ts> && ... && true);
 
 } // namespace sl::meta::type

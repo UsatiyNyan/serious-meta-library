@@ -10,7 +10,12 @@
 namespace sl::meta::type {
 
 template <typename T, typename...>
-using head_t = T;
+struct head {
+    using type = T;
+};
+
+template <typename... Ts>
+using head_t = typename head<Ts...>::type;
 
 template <std::size_t Idx, typename... Ts>
 using at_t = std::tuple_element_t<Idx, std::tuple<Ts...>>;

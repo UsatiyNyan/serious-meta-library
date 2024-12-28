@@ -8,6 +8,11 @@
 
 namespace sl::meta {
 
+template <typename... Ts>
+struct head_test {
+    using type = type::head_t<Ts...>;
+};
+
 TEST(type, head) {
     static_assert(std::is_same_v<int, type::head_t<int>>);
     static_assert(std::is_same_v<int, type::head_t<int, char>>);

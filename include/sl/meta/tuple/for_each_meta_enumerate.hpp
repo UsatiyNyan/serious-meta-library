@@ -9,25 +9,22 @@
 namespace sl::meta {
 namespace detail {
 
-template <template <std::size_t> typename F, typename TupleT, std::size_t... idxs>
-auto for_each_meta_enumerate(TupleT& tuple, std::index_sequence<idxs...>) {
-    if constexpr ((std::is_void_v<decltype(F<idxs>{}(std::get<idxs>(tuple)))> || ...)) {
-        (F<idxs>{}(std::get<idxs>(tuple)), ...);
+template <template <std::size_t> typename F, typename TupleTV, std::size_t... idxs>
+auto for_each_meta_enumerate(TupleTV&& tuple, std::index_sequence<idxs...>) {
+    if constexpr ((std::is_void_v<decltype(F<idxs>{}(std::get<idxs>(std::forward<TupleTV>(tuple))))> || ...)) {
+        (F<idxs>{}(std::get<idxs>(std::forward<TupleTV>(tuple))), ...);
     } else {
-        return std::tuple{ F<idxs>{}(std::get<idxs>(tuple))... };
+        return std::tuple{ F<idxs>{}(std::get<idxs>(std::forward<TupleTV>(tuple)))... };
     }
 }
 
 } // namespace detail
 
-template <template <std::size_t> typename F, typename... Ts>
-auto for_each_meta_enumerate(std::tuple<Ts...>& tuple) {
-    return detail::for_each_meta_enumerate<F>(tuple, std::make_index_sequence<sizeof...(Ts)>());
-}
-
-template <template <std::size_t> typename F, typename... Ts>
-auto for_each_meta_enumerate(const std::tuple<Ts...>& tuple) {
-    return detail::for_each_meta_enumerate<F>(tuple, std::make_index_sequence<sizeof...(Ts)>());
+template <template <std::size_t> typename F, typename TupleTV>
+auto for_each_meta_enumerate(TupleTV&& tuple) {
+    using TupleT = std::decay_t<TupleTV>;
+    constexpr std::size_t tuple_size = std::tuple_size_v<TupleT>;
+    return detail::for_each_meta_enumerate<F>(std::forward<TupleTV>(tuple), std::make_index_sequence<tuple_size>());
 }
 
 } // namespace sl::meta

@@ -9,23 +9,23 @@
 namespace sl::meta {
 namespace detail {
 
-template <typename TupleT, std::size_t... idxs>
-auto enumerate(TupleT& tuple, std::index_sequence<idxs...>) {
+template <typename TupleTV, std::size_t... idxs>
+auto enumerate(TupleTV&& tuple, std::index_sequence<idxs...>) {
     return std::tuple{
-        std::tuple<std::size_t, std::tuple_element_t<idxs, TupleT>>{ idxs, std::get<idxs>(tuple) }... //
+        std::make_tuple(
+            /* .0 = */ idxs,
+            /* .1 = */ std::get<idxs>(std::forward<TupleTV>(tuple))
+        )... //
     };
 }
 
 } // namespace detail
 
-template <template <typename...> typename TupleT, typename... Ts>
-auto enumerate(TupleT<Ts...>& tuple) {
-    return detail::enumerate(tuple, std::make_index_sequence<sizeof...(Ts)>());
-}
-
-template <template <typename...> typename TupleT, typename... Ts>
-auto enumerate(const TupleT<Ts...>& tuple) {
-    return detail::enumerate(tuple, std::make_index_sequence<sizeof...(Ts)>());
+template <typename TupleTV>
+auto enumerate(TupleTV&& tuple) {
+    using TupleT = std::decay_t<TupleTV>;
+    constexpr std::size_t tuple_size = std::tuple_size_v<TupleT>;
+    return detail::enumerate(std::forward<TupleTV>(tuple), std::make_index_sequence<tuple_size>());
 }
 
 } // namespace sl::meta

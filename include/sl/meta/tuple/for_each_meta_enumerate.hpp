@@ -14,7 +14,7 @@ auto for_each_meta_enumerate(TupleTV&& tuple, std::index_sequence<idxs...>) {
     if constexpr ((std::is_void_v<decltype(F<idxs>{}(std::get<idxs>(std::forward<TupleTV>(tuple))))> || ...)) {
         (F<idxs>{}(std::get<idxs>(std::forward<TupleTV>(tuple))), ...);
     } else {
-        return std::tuple{ F<idxs>{}(std::get<idxs>(std::forward<TupleTV>(tuple)))... };
+        return std::make_tuple(F<idxs>{}(std::get<idxs>(std::forward<TupleTV>(tuple)))...);
     }
 }
 

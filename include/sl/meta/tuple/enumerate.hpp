@@ -11,12 +11,12 @@ namespace detail {
 
 template <typename TupleTV, std::size_t... idxs>
 auto enumerate(TupleTV&& tuple, std::index_sequence<idxs...>) {
-    return std::tuple{
+    return std::make_tuple(
         std::tuple{
             /* .0 = */ idxs,
             /* .1 = */ std::get<idxs>(std::forward<TupleTV>(tuple)),
         }... //
-    };
+    );
 }
 
 } // namespace detail

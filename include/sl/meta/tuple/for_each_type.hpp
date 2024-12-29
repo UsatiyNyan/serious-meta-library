@@ -20,7 +20,7 @@ struct for_each_type<TupleT<Ts...>> {
         if constexpr ((std::is_void_v<decltype(F<Ts>{}(std::forward<Args>(args)...))> || ...)) {
             (F<Ts>{}(std::forward<Args>(args)...), ...);
         } else {
-            return std::tuple{ F<Ts>{}(std::forward<Args>(args)...)... };
+            return std::make_tuple(F<Ts>{}(std::forward<Args>(args)...)...);
         }
     }
 };

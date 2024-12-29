@@ -14,7 +14,7 @@ auto for_each_enumerate(FV&& func, TupleTV& tuple, std::index_sequence<idxs...>)
     if constexpr ((std::is_void_v<decltype(func(std::get<idxs>(std::forward<TupleTV>(tuple))))> || ...)) {
         (std::forward<FV>(func)(idxs, std::get<idxs>(std::forward<TupleTV>(tuple))), ...);
     } else {
-        return std::tuple{ std::forward<FV>(func)(idxs, std::get<idxs>(std::forward<TupleTV>(tuple)))... };
+        return std::make_tuple(std::forward<FV>(func)(idxs, std::get<idxs>(std::forward<TupleTV>(tuple)))...);
     }
 }
 

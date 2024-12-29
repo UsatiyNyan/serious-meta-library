@@ -4,6 +4,8 @@
 
 #include "fixture/lifecycle.hpp"
 #include "sl/meta/intrusive.hpp"
+#include "sl/meta/intrusive/algorithm.hpp"
+#include "sl/meta/intrusive/forward_list.hpp"
 
 #include <gtest/gtest.h>
 
@@ -133,6 +135,62 @@ TEST(intrusive, listSwap) {
             fixture::lifecycle::state::destructed,
         };
         EXPECT_EQ(fixture::lifecycle::states[std::to_string(i)], expected_states);
+    }
+}
+
+struct intrusive_int : intrusive_forward_list_node<intrusive_int> {
+    int value;
+};
+
+TEST(intrusiveNode, forEach) {
+    std::vector<intrusive_int> values;
+    for (int i = 0; i < 100; ++i) {
+        auto& node = values.emplace_back();
+        node.value = i;
+        node.intrusive_next = nullptr;
+    }
+
+    for (std::size_t i = 0; i < 99; ++i) {
+        auto& node = values.at(i);
+        auto& next = values.at(i + 1);
+        node.intrusive_next = &next;
+    }
+
+    std::vector<int> for_each_result;
+    intrusive_forward_list_node_for_each(&values.front(), [&for_each_result](intrusive_int* x) {
+        for_each_result.push_back(x->value);
+    });
+    ASSERT_EQ(for_each_result.size(), 100);
+
+    for (int i = 0; i < 100; ++i) {
+        ASSERT_EQ(for_each_result.at(static_cast<std::size_t>(i)), i);
+    }
+}
+
+TEST(intrusiveNode, reverse) {
+    std::vector<intrusive_int> values;
+    for (int i = 0; i < 100; ++i) {
+        auto& node = values.emplace_back();
+        node.value = i;
+        node.intrusive_next = nullptr;
+    }
+
+    for (std::size_t i = 0; i < 99; ++i) {
+        auto& node = values.at(i);
+        auto& next = values.at(i + 1);
+        node.intrusive_next = &next;
+    }
+
+    intrusive_forward_list_node_reverse(&values.front());
+
+    std::vector<int> for_each_result;
+    intrusive_forward_list_node_for_each(&values.back(), [&for_each_result](intrusive_int* x) {
+        for_each_result.push_back(x->value);
+    });
+    ASSERT_EQ(for_each_result.size(), 100);
+
+    for (int i = 0; i < 100; ++i) {
+        ASSERT_EQ(for_each_result.at(static_cast<std::size_t>(i)), 99 - i);
     }
 }
 

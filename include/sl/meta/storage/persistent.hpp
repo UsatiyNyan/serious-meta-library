@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "sl/meta/func/const.hpp"
 #include "sl/meta/lifetime/immovable.hpp"
 #include "sl/meta/lifetime/lazy_eval.hpp"
+#include "sl/meta/type/const.hpp"
 
 #include <tl/expected.hpp>
 #include <tl/optional.hpp>

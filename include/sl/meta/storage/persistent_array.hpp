@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "sl/meta/func/const.hpp"
+#include "sl/meta/type/const.hpp"
 #include "sl/meta/lifetime/immovable.hpp"
 
 #include <range/v3/size.hpp>

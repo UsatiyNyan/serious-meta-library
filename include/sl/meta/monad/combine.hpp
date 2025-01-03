@@ -4,17 +4,18 @@
 
 #pragma once
 
-#include <tl/optional.hpp>
+#include "sl/meta/monad/maybe.hpp"
+
 #include <tuple>
 
 namespace sl::meta {
 
 template <typename... Ts>
-tl::optional<std::tuple<Ts...>> combine(tl::optional<Ts>... optionals) {
+maybe<std::tuple<Ts...>> combine(maybe<Ts>... optionals) {
     if ((optionals.has_value() && ... && true)) {
         return std::make_tuple(std::move(optionals).value()...);
     } else {
-        return tl::nullopt;
+        return null;
     }
 }
 

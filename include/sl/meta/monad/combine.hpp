@@ -11,8 +11,8 @@ namespace sl::meta {
 
 template <typename... Ts>
 tl::optional<std::tuple<Ts...>> combine(tl::optional<Ts>... optionals) {
-    if ((optionals.has_value() && ...)) {
-        return std::tuple<Ts...>{ std::move(optionals).value()... };
+    if ((optionals.has_value() && ... && true)) {
+        return std::make_tuple(std::move(optionals).value()...);
     } else {
         return tl::nullopt;
     }

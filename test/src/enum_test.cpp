@@ -46,10 +46,10 @@ TEST(enum, flag) {
     constexpr enum_flag flag100{ TestFlagEnum::FLAG2 };
     constexpr auto flag011 = flag001 | flag010;
 
-    static_assert(!(flag011 & flag000));
-    static_assert(flag011 & flag001);
-    static_assert(flag011 & flag010);
-    static_assert(!(flag011 & flag100));
+    static_assert(!(flag011 & TestFlagEnum::NONE));
+    static_assert(flag011 & TestFlagEnum::FLAG0);
+    static_assert(flag011 & TestFlagEnum::FLAG1);
+    static_assert(!(flag011 & TestFlagEnum::FLAG2));
 
     constexpr int iflag000 = 0;
     constexpr int iflag001 = 0x0001;

@@ -21,7 +21,7 @@ public:
     using underlying_type = std::underlying_type_t<EnumT>;
 
     explicit constexpr enum_flag(EnumT enum_value) : value_{ static_cast<underlying_type>(enum_value) } {}
-    explicit constexpr enum_flag(underlying_type value) : value_{ value } {}
+    explicit constexpr enum_flag(underlying_type value = underlying_type{}) : value_{ value } {}
 
     explicit constexpr operator EnumT() const { return static_cast<EnumT>(value_); }
     explicit constexpr operator underlying_type() const { return value_; }
@@ -38,6 +38,12 @@ public:
     }
     constexpr enum_flag operator~() const { return enum_flag{ static_cast<underlying_type>(~value_) }; }
     constexpr bool operator==(enum_flag other) const { return value_ == other.value_; }
+
+    // for convenience
+    constexpr enum_flag operator|(EnumT other) const { return *this | enum_flag(other); }
+    constexpr enum_flag operator&(EnumT other) const { return *this & enum_flag(other); }
+    constexpr enum_flag operator^(EnumT other) const { return *this ^ enum_flag(other); }
+    constexpr bool operator==(EnumT other) const { return value_ == enum_flag(other); }
 
 private:
     underlying_type value_;

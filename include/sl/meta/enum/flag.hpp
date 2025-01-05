@@ -23,9 +23,9 @@ public:
     explicit constexpr enum_flag(EnumT enum_value) : value_{ static_cast<underlying_type>(enum_value) } {}
     explicit constexpr enum_flag(underlying_type value = underlying_type{}) : value_{ value } {}
 
-    explicit constexpr operator EnumT() const { return static_cast<EnumT>(value_); }
-    explicit constexpr operator underlying_type() const { return value_; }
-    constexpr operator bool() const { return value_ != underlying_type{}; }
+    constexpr EnumT get_enum() const { return static_cast<EnumT>(value_); }
+    constexpr underlying_type get_underlying() const { return value_; }
+    explicit constexpr operator bool() const { return value_ != underlying_type{}; }
 
     constexpr enum_flag operator|(enum_flag other) const {
         return enum_flag{ static_cast<underlying_type>(value_ | other.value_) };

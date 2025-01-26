@@ -139,6 +139,13 @@ struct basic_unique_string_storage<C, Traits, Alloc>::cell_table_hash {
 using unique_string = basic_unique_string<char>;
 using unique_string_storage = basic_unique_string_storage<char>;
 
+constexpr auto operator""_us(const char* str, std::size_t len) {
+    return [hsv = hash_string_view{ std::string_view{ str, len } }](unique_string_storage& storage) {
+        auto result = storage.emplace(hsv);
+        return result.has_value() ? result.value() : result.error();
+    };
+}
+
 } // namespace sl::meta
 
 template <typename C, template <typename> typename Traits, template <typename> typename Alloc>

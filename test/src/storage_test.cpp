@@ -360,5 +360,13 @@ TEST(storage, uniqueStringNesting) {
     }
 }
 
+TEST(storage, uniqueStringLiteral) {
+    unique_string_storage storage{ 128 };
+    const unique_string entry = "oraora"_us(storage);
+    ASSERT_EQ(entry.string_view(), "oraora");
+    ASSERT_EQ(storage.memory(), "oraora");
+    const auto maybe_entry = storage.lookup("oraora"_hsv);
+    ASSERT_TRUE(maybe_entry.has_value());
+}
 
 } // namespace sl::meta

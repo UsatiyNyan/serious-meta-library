@@ -2,6 +2,7 @@
 // Created by usatiynyan.
 //
 
+#include "sl/meta/func/undefined.hpp"
 #include "sl/meta/type/list.hpp"
 
 #include <gtest/gtest.h>
@@ -23,6 +24,12 @@ TEST(type, at) {
     static_assert(std::is_same_v<int, type::at_t<0, int>>);
     static_assert(std::is_same_v<void, type::at_t<3, int, char, std::string, void>>);
     static_assert(std::is_same_v<std::string, type::at_t<2, int, char, std::string, void>>);
+}
+
+TEST(type, repeat) {
+    static_assert(std::is_same_v<std::tuple<>, type::repeat_t<meta::undefined, 0>>);
+    static_assert(std::is_same_v<std::tuple<int, int, int>, type::repeat_t<int, 3>>);
+    static_assert(std::is_same_v<std::tuple<std::string>, type::repeat_t<std::string, 1>>);
 }
 
 TEST(type, areSame) {

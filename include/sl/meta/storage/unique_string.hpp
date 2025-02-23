@@ -121,6 +121,11 @@ public:
         return key_reference;
     }
 
+    [[nodiscard]] reference insert(basic_hash_string_view<C> str_id) {
+        auto result = emplace(str_id);
+        return result.has_value() ? result.value() : result.error();
+    }
+
     [[nodiscard]] const auto& memory() const { return memory_; }
 
 private:
@@ -141,8 +146,7 @@ using unique_string_storage = basic_unique_string_storage<char>;
 
 constexpr auto operator""_us(const char* str, std::size_t len) {
     return [hsv = hash_string_view{ std::string_view{ str, len } }](unique_string_storage& storage) {
-        auto result = storage.emplace(hsv);
-        return result.has_value() ? result.value() : result.error();
+        return storage.insert(hsv);
     };
 }
 

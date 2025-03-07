@@ -369,4 +369,13 @@ TEST(storage, uniqueStringLiteral) {
     ASSERT_TRUE(maybe_entry.has_value());
 }
 
+TEST(storage, uniqueFormatStringLiteral) {
+    unique_string_storage storage{ 128 };
+    const unique_string entry = "oraora{}"_ufs("mudamuda")(storage);
+    ASSERT_EQ(entry.string_view(), "oraoramudamuda");
+    ASSERT_EQ(storage.memory(), "oraoramudamuda");
+    const auto maybe_entry = storage.lookup("oraoramudamuda"_hsv);
+    ASSERT_TRUE(maybe_entry.has_value());
+}
+
 } // namespace sl::meta

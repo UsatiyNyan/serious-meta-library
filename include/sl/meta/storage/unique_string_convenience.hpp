@@ -21,9 +21,8 @@ constexpr auto operator""_us(const char* str, std::size_t len) {
 
 constexpr auto operator""_ufs(const char* str, std::size_t len) {
     return [sv = std::string_view{ str, len }](auto&&... args) {
-        return [fs = fmt::format(sv, std::forward<decltype(args)>(args)...)](unique_string_storage& storage) {
-            return storage.insert(hash_string_view{ std::string_view{ fs } });
-        };
+        return [fs = fmt::format(fmt::runtime(sv), std::forward<decltype(args)>(args)...)] //
+            (unique_string_storage & storage) { return storage.insert(hash_string_view{ std::string_view{ fs } }); };
     };
 }
 

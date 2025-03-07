@@ -378,4 +378,10 @@ TEST(storage, uniqueFormatStringLiteral) {
     ASSERT_TRUE(maybe_entry.has_value());
 }
 
+TEST(storage, uniqueFormatString) {
+    unique_string_storage storage{ 128 };
+    const unique_string entry = "oraora"_us(storage);
+    ASSERT_EQ(fmt::format("{}", entry), "oraora");
+}
+
 } // namespace sl::meta

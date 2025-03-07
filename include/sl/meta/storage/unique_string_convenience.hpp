@@ -27,3 +27,12 @@ constexpr auto operator""_ufs(const char* str, std::size_t len) {
 }
 
 } // namespace sl::meta
+
+template <typename C, template <typename> typename Traits, template <typename> typename Alloc>
+struct fmt::formatter<sl::meta::basic_unique_string<C, Traits, Alloc>>
+    : fmt::formatter<std::basic_string_view<C, Traits<C>>> {
+    template <typename Context>
+    constexpr format_context::iterator format(const sl::meta::basic_unique_string<C, Traits, Alloc>& us, Context& ctx) {
+        return fmt::formatter<std::basic_string_view<C, Traits<C>>>::format(us.string_view(), ctx);
+    }
+};

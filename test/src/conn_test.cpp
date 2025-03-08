@@ -113,6 +113,13 @@ TEST(conn, dirty) {
         ASSERT_TRUE(changed_value.has_value());
         EXPECT_EQ(changed_value.value(), "hello");
     }
+    {
+        ASSERT_FALSE(dirty_string.release().has_value());
+        dirty_string.set_dirty(true);
+        const auto changed_value = dirty_string.release();
+        ASSERT_TRUE(changed_value.has_value());
+        EXPECT_EQ(changed_value.value(), "hello");
+    }
 
     dirty<std::string> dirty_string_empty;
     EXPECT_EQ(dirty_string_empty.get(), tl::nullopt);

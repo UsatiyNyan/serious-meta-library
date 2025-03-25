@@ -7,13 +7,13 @@
 namespace sl::meta {
 
 struct unique {
-    unique() = default;
+    constexpr unique() = default;
 
     unique(const unique&) = delete;
     unique& operator=(const unique&) = delete;
 
-    unique(unique&&) = default;
-    unique& operator=(unique&&) = default;
+    unique(unique&&) noexcept = default;
+    unique& operator=(unique&&) noexcept = default;
 };
 
 } // namespace sl::meta

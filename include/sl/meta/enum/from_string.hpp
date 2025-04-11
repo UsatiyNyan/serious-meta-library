@@ -31,8 +31,13 @@ concept enum_convertible_from_string = //
 template <detail::enum_convertible_to_string EnumT>
 constexpr auto make_enum_match_map() {
     return make_match_map<std::string_view, EnumT>([](auto match) {
-        for (EnumT e = EnumT{}; e != EnumT::ENUM_END;
-             e = static_cast<EnumT>(static_cast<std::underlying_type_t<EnumT>>(e) + 1)) {
+        constexpr auto next = [](EnumT e) {
+            using underlying_type = std::underlying_type_t<EnumT>;
+            const auto u = static_cast<underlying_type>(e);
+            return static_cast<EnumT>(u + 1);
+        };
+
+        for (EnumT e{}; e != EnumT::ENUM_END; e = next(e)) {
             std::string_view e_str = enum_to_str(e);
             if (e_str.empty()) {
                 continue;

@@ -6,43 +6,35 @@
 
 #include "sl/meta/lifetime/unique.hpp"
 
-#include <function2/function2.hpp>
+#include "sl/meta/func/function.hpp"
 
 namespace sl::meta {
 template <typename Capacity = fu2::capacity_default>
-class defer : public unique {
-    using defer_function_t = fu2::function_base<
-        /*IsOwning=*/true,
-        /*IsCopyable=*/false,
-        /*Capacity=*/Capacity,
-        /*IsThrowing=*/false,
-        /*HasStrongExceptGuarantee=*/true,
-        /*Signatures=*/void()>;
+struct defer : unique {
+    using impl_type = unique_function<void(), Capacity>;
 
 public:
-    defer(defer&& other) noexcept : f_(std::move(other.f_)) { other.f_ = nullptr; }
+    defer(defer&& other) noexcept : f_{ std::exchange(other.f_, nullptr) } {}
     defer& operator=(defer&& other) noexcept {
         if (this != &other) {
             call();
-            f_ = std::move(other.f_);
-            other.f_ = nullptr;
+            f_ = std::exchange(other.f_, nullptr);
         }
         return *this;
     }
 
-    explicit defer(defer_function_t f) : f_(std::move(f)) {}
+    explicit defer(impl_type f) : f_(std::move(f)) {}
     ~defer() noexcept { call(); }
 
 private:
     void call() noexcept {
-        if (f_) {
-            f_();
-            f_ = nullptr;
+        if (auto f = std::exchange(f_, nullptr)) {
+            f();
         }
     }
 
 private:
-    defer_function_t f_{};
+    impl_type f_{};
 };
 
 template <typename F>

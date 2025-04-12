@@ -338,4 +338,42 @@ TEST(match, pmatchPtrLifecycle) {
     EXPECT_EQ(fixture::lifecycle::states["ptr"], expected_states);
 }
 
+TEST(match, pmatchInheritance) {
+    struct A {};
+    struct B : A {};
+    struct C : B {};
+
+    using ABC = std::variant<A, B, C>;
+
+    constexpr ABC c{ C{} };
+
+    {
+        constexpr auto result = c
+                                | pmatch{
+                                      [](const A&) -> std::string_view { return "A"; },
+                                      [](const B&) -> std::string_view { return "B"; },
+                                      [](const C&) -> std::string_view { return "C"; },
+                                  };
+
+        static_assert(result == "C");
+    }
+
+    {
+        constexpr auto result = c
+                                | pmatch{
+                                      [](const A&) -> std::string_view { return "A"; },
+                                      [](const B&) -> std::string_view { return "B"; },
+                                  };
+        static_assert(result == "B");
+    }
+
+    {
+        constexpr auto result = c
+                                | pmatch{
+                                      [](const A&) -> std::string_view { return "A"; },
+                                  };
+        static_assert(result == "A");
+    }
+}
+
 } // namespace sl::meta

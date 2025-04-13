@@ -16,27 +16,21 @@ namespace sl::meta {
 namespace detail {
 
 template <typename EnumT, typename = void>
-struct has_enum_end : std::false_type {};
+struct HasEnumEnd : std::false_type {};
 
 template <typename EnumT>
-struct has_enum_end<EnumT, decltype(EnumT::ENUM_END)> : std::true_type {};
+struct HasEnumEnd<EnumT, decltype(EnumT::ENUM_END)> : std::true_type {};
 
 template <typename EnumT>
-concept enum_convertible_from_string = //
-    enum_convertible_to_string<EnumT> && //
-    has_enum_end<EnumT>::value;
+concept EnumConvertibleFromString = //
+    EnumConvertibleToString<EnumT> && //
+    HasEnumEnd<EnumT>::value;
 
 } // namespace detail
 
-template <detail::enum_convertible_to_string EnumT>
+template <detail::EnumConvertibleToString EnumT>
 constexpr auto make_enum_match_map() {
     return make_match_map<std::string_view, EnumT>([](auto match) {
-        constexpr auto next = [](EnumT e) {
-            using underlying_type = std::underlying_type_t<EnumT>;
-            const auto u = static_cast<underlying_type>(e);
-            return static_cast<EnumT>(u + 1);
-        };
-
         for (EnumT e{}; e != EnumT::ENUM_END; e = next(e)) {
             std::string_view e_str = enum_to_str(e);
             if (e_str.empty()) {
@@ -48,7 +42,7 @@ constexpr auto make_enum_match_map() {
     });
 }
 
-template <detail::enum_convertible_to_string EnumT>
+template <detail::EnumConvertibleToString EnumT>
 constexpr EnumT enum_from_str(std::string_view str) {
     constexpr auto m = make_enum_match_map<EnumT>();
     return m[str].value_or(EnumT::ENUM_END);

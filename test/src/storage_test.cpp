@@ -2,6 +2,7 @@
 // Created by usatiynyan.
 //
 
+#include "sl/meta/lifetime/lazy_eval.hpp"
 #include "sl/meta/storage.hpp"
 
 #include "fixture/lifecycle.hpp"
@@ -18,15 +19,14 @@ TEST(storage, persistent) {
     const auto guard = fixture::lifecycle::make_states_guard();
 
     {
-        persistent_storage<std::string, fixture::lifecycle> lifecycle_storage{ 128 };
+        // guarantee that items are not copied
+        persistent_storage<std::string, fixture::lifecycle> lifecycle_storage{ { .memory_capacity = 128 } };
         const std::string key{ "oraora" };
 
         {
-            const auto emplace_result = lifecycle_storage.emplace(key, [] { return fixture::lifecycle{ "inserted" }; });
-            ASSERT_TRUE(emplace_result.has_value());
-
-            const auto& reference = emplace_result.value();
-            EXPECT_EQ(reference->id, "inserted");
+            const auto [value, is_emplaced] = lifecycle_storage.emplace(key, "inserted");
+            ASSERT_TRUE(is_emplaced);
+            EXPECT_EQ(value->id, "inserted");
             const std::vector inserted_states{ fixture::lifecycle::state::constructed };
             EXPECT_EQ(fixture::lifecycle::states["inserted"], inserted_states);
         }
@@ -42,25 +42,18 @@ TEST(storage, persistent) {
         }
 
         {
-            const auto emplace_result =
-                lifecycle_storage.emplace(key, [] { return fixture::lifecycle{ "not_inserted" }; });
-            ASSERT_FALSE(emplace_result.has_value());
-
-            const auto& reference = emplace_result.error();
-            EXPECT_EQ(reference->id, "inserted");
+            const auto [value, is_emplaced] = lifecycle_storage.emplace(key, "not_inserted");
+            ASSERT_FALSE(is_emplaced);
+            EXPECT_EQ(value->id, "inserted");
             const std::vector<fixture::lifecycle::state> not_inserted_states;
             EXPECT_EQ(fixture::lifecycle::states["not_inserted"], not_inserted_states);
         }
 
-
         {
             const std::string other_key{ "mudamuda" };
-            const auto emplace_result =
-                lifecycle_storage.emplace(other_key, [] { return fixture::lifecycle{ "also_inserted" }; });
-            ASSERT_TRUE(emplace_result.has_value());
-
-            const auto& reference = emplace_result.value();
-            EXPECT_EQ(reference->id, "also_inserted");
+            const auto [value, is_emplaced] = lifecycle_storage.emplace(other_key, "also_inserted");
+            ASSERT_TRUE(is_emplaced);
+            EXPECT_EQ(value->id, "also_inserted");
             const std::vector inserted_states{ fixture::lifecycle::state::constructed };
             EXPECT_EQ(fixture::lifecycle::states["also_inserted"], inserted_states);
         }
@@ -80,11 +73,11 @@ TEST(storage, persistentNesting) {
                                              fixture::lifecycle::state::destructed };
 
     {
-        persistent_storage<std::string, fixture::lifecycle> outer{ 128 };
-        (void)outer.emplace(key, [] { return fixture::lifecycle{ "outer" }; });
+        persistent_storage<std::string, fixture::lifecycle> outer;
+        std::ignore = outer.emplace(key, "outer");
 
         {
-            persistent_storage<std::string, fixture::lifecycle> inner{ 128, outer };
+            persistent_storage<std::string, fixture::lifecycle> inner{ { .parent = outer } };
             const std::string inner_key{ "mudamuda" };
 
             {
@@ -99,7 +92,7 @@ TEST(storage, persistentNesting) {
                 EXPECT_FALSE(maybe_reference.has_value());
             }
 
-            (void)inner.emplace(key, [] { return fixture::lifecycle{ "inner" }; });
+            std::ignore = inner.emplace(key, "inner");
 
             {
                 const auto maybe_reference = inner.lookup(key);

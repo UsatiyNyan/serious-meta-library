@@ -278,8 +278,8 @@ TEST(storage, persistentArrayNesting) {
 }
 
 TEST(storage, uniqueString) {
-    unique_string_storage storage{ 128 };
-    ASSERT_TRUE(storage.memory().empty());
+    unique_string_storage storage;
+    ASSERT_TRUE(storage.memory_str().empty());
 
     {
         const auto maybe_entry = storage.lookup("oraora"_hsv);
@@ -287,13 +287,12 @@ TEST(storage, uniqueString) {
     }
 
     {
-        const auto emplace_result = storage.emplace("oraora"_hsv);
-        ASSERT_TRUE(emplace_result.has_value());
-        const auto& entry = emplace_result.value();
+        const auto [entry, is_emplaced] = storage.emplace("oraora"_hsv);
+        ASSERT_TRUE(is_emplaced);
         ASSERT_EQ(entry.string_view(), "oraora");
     }
 
-    ASSERT_EQ(storage.memory(), "oraora");
+    ASSERT_EQ(storage.memory_str(), "oraora");
 
     {
         const auto maybe_entry = storage.lookup("oraora"_hsv);
@@ -308,13 +307,12 @@ TEST(storage, uniqueString) {
     }
 
     {
-        const auto emplace_result = storage.emplace("mudamuda"_hsv);
-        ASSERT_TRUE(emplace_result.has_value());
-        const auto& entry = emplace_result.value();
+        const auto [entry, is_emplaced] = storage.emplace("mudamuda"_hsv);
+        ASSERT_TRUE(is_emplaced);
         ASSERT_EQ(entry.string_view(), "mudamuda");
     }
 
-    ASSERT_EQ(storage.memory(), "oraoramudamuda");
+    ASSERT_EQ(storage.memory_str(), "oraoramudamuda");
 
     {
         const auto maybe_entry = storage.lookup("oraora"_hsv);
@@ -332,12 +330,12 @@ TEST(storage, uniqueString) {
 }
 
 TEST(storage, uniqueStringNesting) {
-    unique_string_storage outer{ 128 };
-    (void)outer.emplace("oraora"_hsv);
+    unique_string_storage outer;
+    std::ignore = outer.emplace("oraora"_hsv);
 
     {
-        unique_string_storage inner{ 128, outer };
-        (void)inner.emplace("mudamuda"_hsv);
+        unique_string_storage inner{ { .parent = outer } };
+        std::ignore = inner.emplace("mudamuda"_hsv);
 
         {
             const auto maybe_entry = inner.lookup("oraora"_hsv, 0);
@@ -361,25 +359,25 @@ TEST(storage, uniqueStringNesting) {
 }
 
 TEST(storage, uniqueStringLiteral) {
-    unique_string_storage storage{ 128 };
+    unique_string_storage storage;
     const unique_string entry = "oraora"_us(storage);
     ASSERT_EQ(entry.string_view(), "oraora");
-    ASSERT_EQ(storage.memory(), "oraora");
+    ASSERT_EQ(storage.memory_str(), "oraora");
     const auto maybe_entry = storage.lookup("oraora"_hsv);
     ASSERT_TRUE(maybe_entry.has_value());
 }
 
 TEST(storage, uniqueFormatStringLiteral) {
-    unique_string_storage storage{ 128 };
+    unique_string_storage storage;
     const unique_string entry = "oraora{}"_ufs("mudamuda")(storage);
     ASSERT_EQ(entry.string_view(), "oraoramudamuda");
-    ASSERT_EQ(storage.memory(), "oraoramudamuda");
+    ASSERT_EQ(storage.memory_str(), "oraoramudamuda");
     const auto maybe_entry = storage.lookup("oraoramudamuda"_hsv);
     ASSERT_TRUE(maybe_entry.has_value());
 }
 
 TEST(storage, uniqueFormatString) {
-    unique_string_storage storage{ 128 };
+    unique_string_storage storage;
     const unique_string entry = "oraora"_us(storage);
     ASSERT_EQ(fmt::format("{}", entry), "oraora");
 }

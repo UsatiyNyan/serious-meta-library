@@ -5,45 +5,49 @@
 #pragma once
 
 #include "sl/meta/lifetime/immovable.hpp"
+#include "sl/meta/monad/maybe.hpp"
 #include "sl/meta/string/hash_view.hpp"
 
 #include <libassert/assert.hpp>
-#include <tl/expected.hpp>
-#include <tl/optional.hpp>
 #include <tsl/robin_map.h>
 
-#include <string>
+#include <cstddef>
+#include <string_view>
+#include <vector>
 
 namespace sl::meta {
+namespace detail {
+
+struct basic_unique_string_cell {
+    std::size_t address;
+    std::size_t size;
+
+    bool operator==(const basic_unique_string_cell&) const = default;
+};
+
+} // namespace detail
 
 template <
     typename C,
     template <typename> typename Traits = std::char_traits,
     template <typename> typename Alloc = std::allocator>
-class basic_unique_string {
-public:
-    basic_unique_string(
-        const std::basic_string<C, Traits<C>, Alloc<C>>& memory,
-        std::size_t address,
-        std::size_t size,
-        std::size_t hash
-    )
-        : memory_{ &memory }, address_{ address }, size_{ size }, hash_{ hash } {}
+struct basic_unique_string {
+    basic_unique_string(const std::vector<C, Alloc<C>>& memory, detail::basic_unique_string_cell cell, std::size_t hash)
+        : memory_{ &memory }, cell_{ cell }, hash_{ hash } {}
 
     [[nodiscard]] auto string_view() const {
-        return std::basic_string_view<C, Traits<C>>{ &memory_->at(address_), size_ };
+        return std::basic_string_view<C, Traits<C>>{ memory_->data() + cell_.address, cell_.size };
     }
     [[nodiscard]] auto hash() const { return hash_; }
 
-    bool operator==(const basic_unique_string& other) const = default;
+    bool operator==(const basic_unique_string&) const = default;
     bool operator==(const basic_hash_string_view<C>& other) const {
         return hash() == other.hash() && string_view() == other.string_view();
     }
 
 private:
-    const std::basic_string<C, Traits<C>, Alloc<C>>* memory_;
-    std::size_t address_;
-    std::size_t size_;
+    const std::vector<C, Alloc<C>>* memory_;
+    detail::basic_unique_string_cell cell_;
     std::size_t hash_;
 };
 
@@ -52,94 +56,132 @@ bool operator==(const basic_hash_string_view<C>& a, const basic_unique_string<C,
     return b == a;
 }
 
+namespace detail {
+
+struct basic_unique_string_cell_table_hash {
+    template <typename C, template <typename> typename Traits, template <typename> typename Alloc>
+    std::size_t operator()(const basic_unique_string<C, Traits, Alloc>& us) const {
+        return us.hash();
+    }
+
+    template <typename C>
+    std::size_t operator()(const basic_hash_string_view<C>& hsv) const {
+        return hsv.hash();
+    }
+};
+
+} // namespace detail
+
 template <
     typename C,
     template <typename> typename Traits = std::char_traits,
     template <typename> typename Alloc = std::allocator>
-class basic_unique_string_storage : public immovable {
-    struct cell {
-        std::size_t address;
-        std::size_t size;
+struct basic_unique_string_storage : immovable {
+    using memory_alloc_type = Alloc<C>;
+    using memory_type = std::vector<C, memory_alloc_type>;
+
+    using value_type = basic_unique_string<C, Traits, Alloc>;
+    using cell_type = detail::basic_unique_string_cell;
+    using hash_type = detail::basic_unique_string_cell_table_hash;
+    using table_alloc_type = Alloc<std::pair<value_type, cell_type>>;
+    using table_type = tsl::robin_map<
+        /*Key=*/value_type,
+        /*T=*/cell_type,
+        /*Hash=*/hash_type,
+        /*KeyEqual=*/std::equal_to<>,
+        /*Allocator=*/table_alloc_type>;
+
+    struct init_type {
+        maybe<const basic_unique_string_storage&> parent = null;
+        std::size_t memory_capacity = 0;
+        std::size_t table_capacity = 0;
+        const memory_alloc_type& memory_alloc = {};
+        const table_alloc_type& table_alloc = {};
     };
-    struct cell_table_hash;
 
 public:
-    using reference = basic_unique_string<C, Traits, Alloc>;
-
-public:
-    explicit basic_unique_string_storage(
-        std::size_t capacity,
-        tl::optional<const basic_unique_string_storage&> parent = tl::nullopt,
-        const Alloc<C>& memory_alloc = {},
-        const Alloc<std::pair<reference, cell>>& table_alloc = {}
-    )
-        : memory_{ memory_alloc }, cell_table_{ capacity, table_alloc }, parent_{ parent } {
-        memory_.reserve(capacity);
+    explicit basic_unique_string_storage(init_type init = {})
+        : memory_{ init.memory_alloc }, table_{ init.table_capacity, init.table_alloc }, parent_{ init.parent } {
+        memory_.reserve(init.memory_capacity);
     }
 
-    [[nodiscard]] tl::optional<reference> lookup(
-        const basic_hash_string_view<C>& str_id,
+    [[nodiscard]] maybe<value_type> lookup(
+        basic_hash_string_view<C> str_id,
         std::size_t parent_recursion_limit = std::numeric_limits<std::size_t>::max()
     ) const {
-        if (const auto cell_it = cell_table_.find(str_id); cell_it != cell_table_.end()) {
-            return reference{ memory_, cell_it.value().address, cell_it.value().size, str_id.hash() };
+        if (const auto cell_it = table_.find(str_id); cell_it != table_.end()) {
+            return value_type{ memory_, cell_it.value(), str_id.hash() };
         }
         if (parent_recursion_limit == 0) {
-            return tl::nullopt;
+            return null;
         }
         return parent_.and_then([&str_id, &parent_recursion_limit](const basic_unique_string_storage& p) {
             return p.lookup(str_id, parent_recursion_limit - 1);
         });
     }
 
-    // Does not lookup in parents before inserting.
-    // returns: pair<reference, true if inserted|false if assigned>
-    [[nodiscard]] tl::expected<reference, reference> emplace(basic_hash_string_view<C> str_id) {
-        if (auto maybe_reference = lookup(str_id, 0)) {
-            return tl::make_unexpected(std::move(maybe_reference).value());
+    [[nodiscard]] maybe<value_type> lookup(
+        std::basic_string_view<C> str,
+        std::size_t parent_recursion_limit = std::numeric_limits<std::size_t>::max()
+    ) const {
+        return lookup(basic_hash_string_view<C>{ str }, parent_recursion_limit);
+    }
+
+    [[nodiscard]] std::pair<value_type, bool>
+        emplace(basic_hash_string_view<C> str_id, std::size_t parent_recursion_limit = 0) {
+        if (auto maybe_value = lookup(str_id, parent_recursion_limit)) {
+            return std::make_pair(std::move(maybe_value).value(), false);
         }
 
         const auto sv = str_id.string_view();
+        const std::size_t hash = str_id.hash();
 
         // careful, order of operations is important
-        const cell new_cell{ .address = memory_.size(), .size = sv.size() };
-        const std::size_t hash = str_id.hash();
-        memory_.append(sv);
-        const reference key_reference{ memory_, new_cell.address, new_cell.size, hash };
-        const auto [cell_it, is_cell_emplaced] = cell_table_.try_emplace(key_reference, new_cell);
-        const auto& cell = cell_it.value();
-        DEBUG_ASSERT(
-            is_cell_emplaced, "cell was not found in lookup previously, should not ever happen", sv, new_cell, cell
-        );
+        cell_type cell{
+            .address = memory_.size(),
+            .size = sv.size(),
+        };
+        memory_.insert(memory_.end(), sv.begin(), sv.end());
+        value_type value{ memory_, cell, hash };
+        const auto [cell_it, is_cell_emplaced] = table_.try_emplace(value, cell);
 
         // handle ambiguous case
-        if (!is_cell_emplaced) [[unlikely]] {
-            memory_.erase(memory_.size() - sv.size());
-            return tl::make_unexpected(reference{ memory_, cell.address, cell.size, hash });
+        if (!ASSUME_VAL(
+                is_cell_emplaced,
+                "cell was not found in lookup previously, should not ever happen",
+                sv,
+                cell_it.value(),
+                cell
+            )) {
+            memory_.erase(std::prev(memory_.end(), static_cast<std::ptrdiff_t>(sv.size())), memory_.end());
+            return std::make_pair(value_type{ memory_, cell, hash }, false);
         }
 
-        return key_reference;
+        return std::make_pair(std::move(value), true);
     }
 
-    [[nodiscard]] reference insert(basic_hash_string_view<C> str_id) {
-        auto result = emplace(str_id);
-        return result.has_value() ? result.value() : result.error();
+    [[nodiscard]] std::pair<value_type, bool>
+        emplace(std::basic_string_view<C> str, std::size_t parent_recursion_limit = 0) {
+        return emplace(basic_hash_string_view<C>{ str }, parent_recursion_limit);
+    }
+
+    [[nodiscard]] value_type insert(basic_hash_string_view<C> str_id, std::size_t parent_recursion_limit = 0) {
+        return emplace(str_id, parent_recursion_limit).first;
+    }
+
+    [[nodiscard]] value_type insert(std::basic_string_view<C> str, std::size_t parent_recursion_limit = 0) {
+        return emplace(str, parent_recursion_limit).first;
     }
 
     [[nodiscard]] const auto& memory() const { return memory_; }
+    [[nodiscard]] auto memory_str() const { return std::string_view{ memory_.data(), memory_.size() }; }
 
 private:
-    std::basic_string<C, Traits<C>, Alloc<C>> memory_;
-    tsl::robin_map<reference, cell, cell_table_hash, std::equal_to<>, Alloc<std::pair<reference, cell>>> cell_table_;
-    tl::optional<const basic_unique_string_storage&> parent_;
+    memory_type memory_;
+    table_type table_;
+    meta::maybe<const basic_unique_string_storage&> parent_;
 };
 
-
-template <typename C, template <typename> typename Traits, template <typename> typename Alloc>
-struct basic_unique_string_storage<C, Traits, Alloc>::cell_table_hash {
-    std::size_t operator()(const reference& r) const { return r.hash(); }
-    std::size_t operator()(const basic_hash_string_view<C>& r) const { return r.hash(); }
-};
 
 } // namespace sl::meta
 

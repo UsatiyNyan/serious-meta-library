@@ -4,12 +4,11 @@
 
 #pragma once
 
-#include "sl/meta/type/const.hpp"
 #include "sl/meta/lifetime/immovable.hpp"
+#include "sl/meta/monad/maybe.hpp"
+#include "sl/meta/type/const.hpp"
 
 #include <range/v3/size.hpp>
-#include <tl/expected.hpp>
-#include <tl/optional.hpp>
 #include <tsl/robin_map.h>
 
 #include <vector>
@@ -17,22 +16,30 @@
 namespace sl::meta {
 namespace detail {
 
-template <typename T, template <typename> typename Alloc, bool is_const>
+struct persistent_array_cell {
+    std::size_t address;
+    std::size_t size;
+
+    bool operator==(const persistent_array_cell&) const = default;
+};
+
+template <typename T, template <typename> typename Alloc, bool IsConst>
 class persistent_array {
-    using memory_t = add_const_if_t<std::vector<T, Alloc<T>>, is_const>;
-    using span_t = std::span<add_const_if_t<T, is_const>>;
+    using memory_type = add_const_if_t<std::vector<T, Alloc<T>>, IsConst>;
+    using deref_type = add_const_if_t<T, IsConst>;
 
 public:
-    persistent_array(memory_t& memory, std::size_t address, std::size_t size)
-        : memory_{ &memory }, address_{ address }, size_{ size } {}
+    persistent_array(memory_type& memory, persistent_array_cell cell) : cell_{ cell }, memory_{ &memory } {}
 
-    [[nodiscard]] auto span() const { return span_t{ &memory_->at(address_), size_ }; }
-    [[nodiscard]] auto span() { return span_t{ &memory_->at(address_), size_ }; }
+    [[nodiscard]] auto span() const { return std::span{ ptr(), cell_.size }; }
+    [[nodiscard]] auto span() { return std::span{ ptr(), cell_.size }; }
 
 private:
-    memory_t* memory_;
-    std::size_t address_;
-    std::size_t size_;
+    deref_type* ptr() const { return memory_->data() + cell_.address; }
+
+private:
+    persistent_array_cell cell_;
+    memory_type* memory_;
 };
 
 } // namespace detail
@@ -49,68 +56,69 @@ template <
     template <typename> typename Hash = std::hash,
     template <typename> typename Equal = std::equal_to,
     template <typename> typename Alloc = std::allocator>
-class persistent_array_storage : public immovable {
-    struct cell {
-        std::size_t address;
-        std::size_t size;
+struct persistent_array_storage : immovable {
+    using memory_alloc_type = Alloc<T>;
+    using memory_type = std::vector<T, memory_alloc_type>;
+
+    using value_type = persistent_array<T, Alloc>;
+    using const_value_type = const_persistent_array<T, Alloc>;
+    using cell_type = detail::persistent_array_cell;
+    using table_alloc_type = Alloc<std::pair<Id, cell_type>>;
+    using table_type = tsl::robin_map<Id, cell_type, Hash<Id>, Equal<Id>, table_alloc_type>;
+
+    struct init_type {
+        maybe<persistent_array_storage&> parent = null;
+        std::size_t memory_capacity = 0;
+        std::size_t table_capacity = 0;
+        const memory_alloc_type& memory_alloc = {};
+        const table_alloc_type& table_alloc = {};
     };
 
 public:
-    using reference = persistent_array<T, Alloc>;
-    using const_reference = const_persistent_array<T, Alloc>;
-
-public:
-    explicit persistent_array_storage(
-        std::size_t capacity,
-        tl::optional<persistent_array_storage&> parent = tl::nullopt
-    )
-        : memory_{}, cell_table_{ capacity }, parent_{ parent } {
-        memory_.reserve(capacity);
+    explicit persistent_array_storage(init_type init = {})
+        : memory_{ init.memory_alloc }, table_{ init.table_capacity }, parent_{ init.parent } {
+        memory_.reserve(init.memory_capacity);
     }
 
-    [[nodiscard]] tl::optional<const_reference>
+    [[nodiscard]] maybe<const_value_type>
         lookup(const Id& item_id, std::size_t parent_recursion_limit = std::numeric_limits<std::size_t>::max()) const {
         return lookup_impl(*this, item_id, parent_recursion_limit);
     }
 
-    [[nodiscard]] tl::optional<reference>
+    [[nodiscard]] maybe<value_type>
         lookup(const Id& item_id, std::size_t parent_recursion_limit = std::numeric_limits<std::size_t>::max()) {
         return lookup_impl(*this, item_id, parent_recursion_limit);
     }
 
     // Does not lookup in parents before inserting.
     // No exceptions pls, they are not handled.
-    // returns: pair<reference, true if inserted|false if assigned>
     template <typename Range>
-    [[nodiscard]] tl::expected<reference, reference> emplace(const Id& id, Range&& range) {
-        const auto [cell_it, is_cell_emplaced] = cell_table_.try_emplace(
+    [[nodiscard]] std::pair<value_type, bool> emplace(const Id& id, Range&& range) {
+        const auto [cell_it, is_emplaced] = table_.try_emplace(
             id,
-            cell{
+            cell_type{
                 .address = memory_.size(),
                 .size = ranges::size(range),
             }
         );
-        const cell& cell = cell_it.value();
-        reference reference{ memory_, cell.address, cell.size };
-        if (!is_cell_emplaced) {
-            return tl::make_unexpected(reference);
+        value_type value{ memory_, cell_it.value() };
+        if (is_emplaced) {
+            memory_.insert(memory_.end(), ranges::begin(range), ranges::end(range));
         }
-        memory_.insert(memory_.end(), ranges::begin(range), ranges::end(range));
-        return reference;
+        return std::make_pair(std::move(value), is_emplaced);
     }
 
     [[nodiscard]] const auto& memory() const { return memory_; }
 
 private:
-    template <typename Self, bool is_const = std::is_const_v<Self>>
-    static tl::optional<detail::persistent_array<T, Alloc, is_const>>
+    template <typename Self, bool IsConst = std::is_const_v<Self>>
+    static maybe<detail::persistent_array<T, Alloc, IsConst>>
         lookup_impl(Self& self, const Id& item_id, std::size_t parent_recursion_limit) {
-        if (const auto cell_it = self.cell_table_.find(item_id); cell_it != self.cell_table_.end()) {
-            const cell& cell = cell_it.value();
-            return detail::persistent_array<T, Alloc, is_const>{ self.memory_, cell.address, cell.size };
+        if (const auto cell_it = self.table_.find(item_id); cell_it != self.table_.end()) {
+            return detail::persistent_array<T, Alloc, IsConst>{ self.memory_, cell_it.value() };
         }
         if (parent_recursion_limit == 0) {
-            return tl::nullopt;
+            return null;
         }
         return self.parent_.and_then([&item_id, &parent_recursion_limit](Self& p) {
             return lookup_impl(p, item_id, parent_recursion_limit - 1);
@@ -118,9 +126,9 @@ private:
     }
 
 private:
-    std::vector<T, Alloc<T>> memory_;
-    tsl::robin_map<Id, cell, Hash<Id>, Equal<Id>, Alloc<std::pair<Id, cell>>> cell_table_;
-    tl::optional<persistent_array_storage&> parent_;
+    memory_type memory_;
+    table_type table_;
+    maybe<persistent_array_storage&> parent_;
 };
 
 } // namespace sl::meta

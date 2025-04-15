@@ -149,16 +149,14 @@ TEST(storage, persistentArray) {
     const auto guard = fixture::lifecycle::make_states_guard();
 
     {
-        persistent_array_storage<std::string, fixture::lifecycle> lifecycle_storage{ 128 };
+        persistent_array_storage<std::string, fixture::lifecycle> lifecycle_storage{ { .memory_capacity = 128 } };
         const std::string key{ "oraora" };
 
         {
-            const auto emplace_result =
+            const auto [value, is_emplaced] =
                 lifecycle_storage.emplace(key, persistent_array_producer(inserted_persistent_array));
-            ASSERT_TRUE(emplace_result.has_value());
-
-            const auto& reference = emplace_result.value();
-            EXPECT_TRUE(ranges_eq(reference.span(), inserted_persistent_array)) << persistent_array_format(reference);
+            ASSERT_TRUE(is_emplaced);
+            EXPECT_TRUE(ranges_eq(value.span(), inserted_persistent_array)) << persistent_array_format(value);
             const std::vector inserted_states{ fixture::lifecycle::state::constructed };
             EXPECT_EQ(fixture::lifecycle::states["inserted1"], inserted_states);
             EXPECT_EQ(fixture::lifecycle::states["inserted2"], inserted_states);
@@ -179,24 +177,20 @@ TEST(storage, persistentArray) {
             constexpr std::array<std::string_view, 1> not_inserted_persistent_array{
                 "not_inserted1",
             };
-            const auto emplace_result =
+            const auto [value, is_emplaced] =
                 lifecycle_storage.emplace(key, persistent_array_producer(not_inserted_persistent_array));
-            ASSERT_FALSE(emplace_result.has_value());
-
-            const auto& reference = emplace_result.error();
-            EXPECT_TRUE(ranges_eq(reference.span(), inserted_persistent_array));
+            ASSERT_FALSE(is_emplaced);
+            EXPECT_TRUE(ranges_eq(value.span(), inserted_persistent_array));
             const std::vector<fixture::lifecycle::state> not_inserted_states;
             EXPECT_EQ(fixture::lifecycle::states["not_inserted1"], not_inserted_states);
         }
 
         {
             const std::string other_key{ "mudamuda" };
-            const auto emplace_result =
+            const auto [value, is_emplaced] =
                 lifecycle_storage.emplace(other_key, persistent_array_producer(also_inserted_persistent_array));
-            ASSERT_TRUE(emplace_result.has_value());
-
-            const auto& reference = emplace_result.value();
-            EXPECT_TRUE(ranges_eq(reference.span(), also_inserted_persistent_array));
+            ASSERT_TRUE(is_emplaced);
+            EXPECT_TRUE(ranges_eq(value.span(), also_inserted_persistent_array));
             const std::vector inserted_states{ fixture::lifecycle::state::constructed };
             EXPECT_EQ(fixture::lifecycle::states["also_inserted1"], inserted_states);
             EXPECT_EQ(fixture::lifecycle::states["also_inserted2"], inserted_states);
@@ -221,11 +215,12 @@ TEST(storage, persistentArrayNesting) {
                                              fixture::lifecycle::state::destructed };
 
     {
-        persistent_array_storage<std::string, fixture::lifecycle> outer{ 128 };
-        (void)outer.emplace(key, persistent_array_producer(inserted_persistent_array));
+        persistent_array_storage<std::string, fixture::lifecycle> outer{ { .memory_capacity = 128 } };
+        std::ignore = outer.emplace(key, persistent_array_producer(inserted_persistent_array));
 
         {
-            persistent_array_storage<std::string, fixture::lifecycle> inner{ 128, outer };
+            persistent_array_storage<std::string, fixture::lifecycle> inner{ { .parent = outer,
+                                                                               .memory_capacity = 128 } };
             const std::string inner_key{ "mudamuda" };
 
             {
@@ -240,7 +235,7 @@ TEST(storage, persistentArrayNesting) {
                 EXPECT_FALSE(maybe_reference.has_value());
             }
 
-            (void)inner.emplace(key, persistent_array_producer(also_inserted_persistent_array));
+            std::ignore = inner.emplace(key, persistent_array_producer(also_inserted_persistent_array));
 
             {
                 const auto maybe_reference = inner.lookup(key);

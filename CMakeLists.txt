@@ -13,7 +13,7 @@ sl_project_prologue(
     CXX_STANDARD 23)
 project(
         serious-meta-library
-        VERSION 0.0.1
+        VERSION 1.0.0
         DESCRIPTION "metaprogramming library"
         HOMEPAGE_URL "TODO"
         LANGUAGES CXX)

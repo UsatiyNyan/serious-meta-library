@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "sl/meta/func/undefined.hpp"
+#include "sl/meta/type/undefined.hpp"
 
 #include <tl/expected.hpp>
 

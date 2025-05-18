@@ -1,5 +1,5 @@
 //
-// Created by usatiynyan on 1/3/24.
+// Created by usatiynyan.
 //
 
 #pragma once

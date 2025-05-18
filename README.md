@@ -10,6 +10,9 @@ For serious programmers.
 - "sl/meta/type.hpp"
     - unit, identity, undefined - fundamental types
     - lazy, const, pack - type evaluation/operations
+- "sl/meta/monad.hpp"
+    - type alias on tl::optional and tl::expected (waiting for C++23 std::optional and std::expected)
+    - combinators: WIP
 
 - "sl/meta/string.hpp" 
     - string that can be used as template parameter
@@ -22,9 +25,6 @@ For serious programmers.
     - lazy evaluation
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors
-- "sl/meta/optional.hpp"
-    - uses tl::optional
-    - helpers for tuple<->optional operations
 - "sl/meta/func.hpp"
     - meta function utilities
 - "sl/meta/hash.hpp"

@@ -10,6 +10,8 @@
 
 #include <libassert/assert.hpp>
 
+#include <utility>
+
 namespace sl::meta {
 
 template <typename T>
@@ -116,7 +118,7 @@ private:
 template <typename T>
 template <bool is_const>
 class intrusive_forward_list<T>::iterator {
-    using qualified_node_type = add_const_if_t<node_type, is_const>;
+    using qualified_node_type = type::add_const_if_t<node_type, is_const>;
 
     friend class intrusive_forward_list<T>;
     explicit iterator(qualified_node_type* node) : node_{ node }, next_{ maybe_next(node_) } {}

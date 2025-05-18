@@ -32,6 +32,9 @@ For serious programmers.
 - "sl/meta/enum.hpp"
     - to/from string
     - flag
+- "sl/meta/intrusive.hpp"
+    - forward_list: node and non-owning container
+    - algorithm: node
 
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors

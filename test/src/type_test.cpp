@@ -52,4 +52,17 @@ TEST(type, undefined) {
     // expected = tl::unexpected(undefined{}); // compilation error :3
 }
 
+constexpr char chars[] = "oraoraoraoraoraoraoraoraora";
+
+TEST(staticString, create) { static_assert(static_string{ chars }.string_view() == std::string_view{ chars }); }
+
+template <static_string value_>
+struct StringHolder {
+    static constexpr static_string value = value_;
+};
+
+TEST(staticString, asTemplateArg) {
+    static_assert(StringHolder<chars>::value.string_view() == std::string_view{ chars });
+}
+
 } // namespace sl::meta

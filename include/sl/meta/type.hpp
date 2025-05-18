@@ -13,3 +13,4 @@
 #include "sl/meta/type/lazy.hpp"
 #include "sl/meta/type/const.hpp"
 #include "sl/meta/type/pack.hpp"
+#include "sl/meta/type/static_string.hpp"

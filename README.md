@@ -10,6 +10,7 @@ For serious programmers.
 - "sl/meta/type.hpp"
     - unit, identity, undefined - fundamental types
     - lazy, const, pack - type evaluation/operations
+    - static_string: can be used as a template parameter
 - "sl/meta/monad.hpp"
     - type alias on tl::optional and tl::expected (waiting for C++23 std::optional and std::expected)
     - combinators: WIP
@@ -26,8 +27,6 @@ For serious programmers.
     - fnv1a: constexpr hash function (TODO: more)
     - hash_string_view: string_view with precalculated hash
 
-- "sl/meta/string.hpp" 
-    - string that can be used as template parameter
 - "sl/meta/tuple.hpp"
     - tie_as_tuple for structs, see tests for more examples
     - different flavours of for_each in tuple

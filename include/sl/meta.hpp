@@ -14,7 +14,6 @@
 #include "sl/meta/match.hpp"
 #include "sl/meta/monad.hpp"
 #include "sl/meta/storage.hpp"
-#include "sl/meta/string.hpp"
 #include "sl/meta/traits.hpp"
 #include "sl/meta/tuple.hpp"
 #include "sl/meta/type.hpp"

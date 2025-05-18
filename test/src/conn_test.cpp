@@ -3,7 +3,7 @@
 //
 
 #include "sl/meta/conn.hpp"
-#include "sl/meta/func/identity.hpp"
+#include "sl/meta/type/identity.hpp"
 
 #include <gtest/gtest.h>
 

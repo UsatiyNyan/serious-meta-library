@@ -2,7 +2,7 @@
 // Created by usatiynyan.
 //
 
-#include "fixture/lifecycle.hpp"
+#include "sl/meta/fixture/lifecycle.hpp"
 #include <iostream>
 
 namespace sl::meta::fixture {

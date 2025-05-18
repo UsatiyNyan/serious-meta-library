@@ -2,10 +2,11 @@
 // Created by usatiynyan.
 //
 
-#include "sl/meta/lifetime/lazy_eval.hpp"
+#include "sl/meta/func/lazy_eval.hpp"
 #include "sl/meta/storage.hpp"
 
-#include "fixture/lifecycle.hpp"
+#include "sl/meta/fixture.hpp"
+
 #include <gtest/gtest.h>
 
 #include <functional>

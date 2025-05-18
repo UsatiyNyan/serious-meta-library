@@ -20,7 +20,6 @@ project(
 
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(sl::meta ALIAS ${PROJECT_NAME})
-
 target_include_directories(${PROJECT_NAME} INTERFACE include)
 
 add_subdirectory(dependencies)
@@ -30,6 +29,9 @@ include(cmake/generate_tie_as_tuple.cmake)
 set(SL_GENERATE_N_FIELDS 64 CACHE STRING "Max amount of fields to generate tie_as_tuple for")
 sl_generate_tie_as_tuple(${SL_GENERATE_N_FIELDS})
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# test fixture
+add_subdirectory(fixture)
 
 if (NOT PROJECT_IS_TOP_LEVEL)
     return()

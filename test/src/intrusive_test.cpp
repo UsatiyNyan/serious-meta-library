@@ -2,10 +2,9 @@
 // Created by usatiynyan.
 //
 
-#include "fixture/lifecycle.hpp"
 #include "sl/meta/intrusive.hpp"
-#include "sl/meta/intrusive/algorithm.hpp"
-#include "sl/meta/intrusive/forward_list.hpp"
+
+#include "sl/meta/fixture.hpp"
 
 #include <gtest/gtest.h>
 

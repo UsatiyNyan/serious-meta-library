@@ -11,7 +11,6 @@
 #include <unordered_map>
 #include <vector>
 
-
 namespace sl::meta::fixture {
 
 struct lifecycle {

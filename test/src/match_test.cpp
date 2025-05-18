@@ -4,7 +4,7 @@
 
 #include "sl/meta/match.hpp"
 
-#include "fixture/lifecycle.hpp"
+#include "sl/meta/fixture.hpp"
 
 #include <gtest/gtest.h>
 #include <tl/expected.hpp>

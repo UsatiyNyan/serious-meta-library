@@ -5,7 +5,7 @@
 #pragma once
 
 #include "sl/meta/conn/slot.hpp"
-#include "sl/meta/lifetime/unique.hpp"
+#include "sl/meta/traits/unique.hpp"
 
 #include <list>
 

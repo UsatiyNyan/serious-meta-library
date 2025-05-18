@@ -5,7 +5,7 @@
 #pragma once
 
 #include "sl/meta/conn/signal.hpp"
-#include "sl/meta/lifetime/unique.hpp"
+#include "sl/meta/traits/unique.hpp"
 
 #include <concepts>
 #include <utility>
@@ -17,7 +17,7 @@ template <typename T>
 class property : public unique {
 public:
     property() = default;
-    explicit property(T value) : value_{std::move(value)} {}
+    explicit property(T value) : value_{ std::move(value) } {}
 
     [[nodiscard]] const T& get() const { return value_; }
     void set(T value) {

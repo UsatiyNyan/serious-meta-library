@@ -7,7 +7,6 @@
 #include "sl/meta/conn/signal.hpp"
 #include "sl/meta/lifetime/finalizer.hpp"
 
-
 namespace sl::meta {
 
 template <typename... Ts>

@@ -29,6 +29,9 @@ For serious programmers.
 - "sl/meta/tuple.hpp"
     - tie_as_tuple: tie an aggregate as tuple (see tests)
     - decay, enumerate, for_each, for_each_type: utilities
+- "sl/meta/enum.hpp"
+    - to/from string
+    - flag
 
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors

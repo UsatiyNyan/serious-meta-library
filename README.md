@@ -19,6 +19,9 @@ For serious programmers.
 - "sl/meta/lifetime.hpp"
     - defer, finalizer: stack-based resource lifetime management
     - deref: correct perfect pointer forwarding
+- "sl/meta/match.hpp"
+    - match statement and mapping, can be bidirectional
+    - pattern matching for typical sum-types (variant/expected/optional/ptr)
 
 - "sl/meta/string.hpp" 
     - string that can be used as template parameter
@@ -29,8 +32,5 @@ For serious programmers.
     - struct/aggregate field descriptors
 - "sl/meta/hash.hpp"
     - constexpr hash functions
-- "sl/meta/match.hpp"
-    - constexpr match statement and mapping, can be bidirectional
-    - constexpr pattern matching of typical "union" containers (variant/expected/optional/ptr)
 - "sl/meta/storage.hpp"
     - persistent storage of items with unique identifiers

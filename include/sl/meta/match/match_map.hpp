@@ -6,7 +6,6 @@
 
 #include "sl/meta/match/match.hpp"
 
-
 namespace sl::meta {
 namespace detail {
 
@@ -21,7 +20,7 @@ concept MatchProducer = //
 template <typename Key, typename Value, detail::MatchProducer<Key, Value> MatchProducer>
 struct match_map {
     constexpr explicit match_map(MatchProducer producer) : producer_{ std::move(producer) } {}
-    constexpr tl::optional<Value> operator[](const Key& key) const {
+    constexpr maybe<Value> operator[](const Key& key) const {
         return producer_(match<Key, Value>{ key }).result();
     }
 

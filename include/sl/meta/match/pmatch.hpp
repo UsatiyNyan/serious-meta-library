@@ -6,11 +6,9 @@
 
 #include "sl/meta/lifetime/deref.hpp"
 #include "sl/meta/match/overloaded.hpp"
-#include "sl/meta/traits/treat_as.hpp"
+#include "sl/meta/traits/concept.hpp"
 
 #include <variant>
-
-#include <tl/optional.hpp>
 
 namespace sl::meta {
 
@@ -19,42 +17,46 @@ class pmatch {
 public:
     constexpr explicit pmatch(Fs&&... fs) : overloaded_{ std::forward<Fs>(fs)... } {}
 
-    template <treat_as_ptr T>
-    constexpr auto operator()(T&& v) const {
+    template <typename TV>
+        requires PtrLike<std::decay_t<TV>>
+    constexpr auto operator()(TV&& v) const {
         if (v == nullptr) {
             return overloaded_();
         }
-        return overloaded_(deref<T>(std::forward<T>(v)));
+        return overloaded_(deref(std::forward<TV>(v)));
     }
 
-    template <treat_as_optional T>
-    constexpr auto operator()(T&& v) const {
+    template <typename TV>
+        requires OptionalLike<std::decay_t<TV>>
+    constexpr auto operator()(TV&& v) const {
         if (!v.has_value()) {
             return overloaded_();
         }
-        return overloaded_(std::forward<T>(v).value());
+        return overloaded_(std::forward<TV>(v).value());
     }
 
-    template <treat_as_expected T>
-    constexpr auto operator()(T&& v) const {
+    template <typename TV>
+        requires ExpectedLike<std::decay_t<TV>>
+    constexpr auto operator()(TV&& v) const {
         if (!v.has_value()) {
-            return overloaded_(std::forward<T>(v).error());
+            return overloaded_(std::forward<TV>(v).error());
         }
-        return overloaded_(std::forward<T>(v).value());
+        return overloaded_(std::forward<TV>(v).value());
     }
 
-    template <treat_as_variant T>
-    constexpr auto operator()(T&& v) const {
-        return std::visit(overloaded_, std::forward<T>(v));
+    template <typename TV>
+        requires Variant<std::decay_t<TV>>
+    constexpr auto operator()(TV&& v) const {
+        return std::visit(overloaded_, std::forward<TV>(v));
     }
 
 private:
     overloaded<Fs...> overloaded_;
 };
 
-template <typename T, typename... Fs>
-constexpr auto operator|(T&& v, const pmatch<Fs...>& pm) {
-    return pm(std::forward<T>(v));
+template <typename TV, typename... Fs>
+constexpr auto operator|(TV&& v, const pmatch<Fs...>& pm) {
+    return pm(std::forward<TV>(v));
 }
 
 } // namespace sl::meta

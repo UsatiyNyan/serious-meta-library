@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <tl/optional.hpp>
-
+#include "sl/meta/monad/maybe.hpp"
 
 namespace sl::meta {
 
@@ -30,12 +29,12 @@ struct bimatch {
         return *this;
     }
 
-    constexpr tl::optional<Value> value() && { return std::move(value_); }
-    constexpr tl::optional<Key> key() && { return std::move(key_); }
+    constexpr maybe<Value> value() && { return std::move(value_); }
+    constexpr maybe<Key> key() && { return std::move(key_); }
 
 private:
-    tl::optional<Key> key_{};
-    tl::optional<Value> value_{};
+    maybe<Key> key_{};
+    maybe<Value> value_{};
 };
 
 } // namespace sl::meta

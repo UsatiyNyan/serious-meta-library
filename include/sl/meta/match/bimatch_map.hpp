@@ -6,7 +6,6 @@
 
 #include "sl/meta/match/bimatch.hpp"
 
-
 namespace sl::meta {
 namespace detail {
 
@@ -21,10 +20,10 @@ concept BimatchProducer = //
 template <typename Key, typename Value, detail::BimatchProducer<Key, Value> BimatchProducer>
 struct bimatch_map {
     constexpr explicit bimatch_map(BimatchProducer producer) : producer_{ std::move(producer) } {}
-    constexpr tl::optional<Value> value(const Key& key) const {
+    constexpr maybe<Value> value(const Key& key) const {
         return producer_(bimatch<Key, Value>{ key, bimatch_key_tag }).value();
     }
-    constexpr tl::optional<Key> key(const Value& value) const {
+    constexpr maybe<Key> key(const Value& value) const {
         return producer_(bimatch<Key, Value>{ value, bimatch_value_tag }).key();
     }
 

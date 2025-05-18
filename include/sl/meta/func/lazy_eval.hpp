@@ -4,27 +4,31 @@
 
 #pragma once
 
-#include "sl/meta/lifetime/unique.hpp"
+#include "sl/meta/traits/unique.hpp"
 
 #include <type_traits>
 #include <utility>
 
 namespace sl::meta {
 
-template <typename F, typename T = std::invoke_result_t<F>>
-class lazy_eval : public unique {
+template <typename F>
+struct lazy_eval : unique {
+    using value_type = std::invoke_result_t<F>;
+
 public:
     constexpr explicit lazy_eval(F f) : f_{ std::move(f) } {}
 
-    [[nodiscard]] constexpr operator T() && { return std::move(f_)(); }
-    [[nodiscard]] constexpr T operator()() && { return std::move(f_)(); }
+    [[nodiscard]] constexpr operator value_type() && { return std::move(f_)(); }
+    [[nodiscard]] constexpr value_type operator()() && { return std::move(f_)(); }
 
 private:
     F f_;
 };
 
 template <typename T>
-class identity_eval : public unique {
+struct identity_eval : unique {
+    using value_type = T;
+
 public:
     constexpr explicit identity_eval(T value) : value_{ std::move(value) } {}
 

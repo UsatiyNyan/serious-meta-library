@@ -13,6 +13,9 @@ For serious programmers.
 - "sl/meta/monad.hpp"
     - type alias on tl::optional and tl::expected (waiting for C++23 std::optional and std::expected)
     - combinators: WIP
+- "sl/meta/func.hpp"
+    - type alias for function
+    - pipeline, lift, lazy_eval: utilities
 
 - "sl/meta/string.hpp" 
     - string that can be used as template parameter
@@ -25,8 +28,6 @@ For serious programmers.
     - lazy evaluation
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors
-- "sl/meta/func.hpp"
-    - meta function utilities
 - "sl/meta/hash.hpp"
     - constexpr hash functions
 - "sl/meta/match.hpp"

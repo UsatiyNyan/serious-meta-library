@@ -4,13 +4,12 @@
 
 #pragma once
 
-#include "sl/meta/func/identity.hpp"
+#include "sl/meta/type/identity.hpp"
 
 namespace sl::meta {
 
 template <typename F = identity_t>
-class pipeline {
-public:
+struct pipeline {
     constexpr explicit pipeline(F f = F{}) : f_{ std::move(f) } {}
 
     template <typename G>

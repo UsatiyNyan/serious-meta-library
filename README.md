@@ -22,6 +22,9 @@ For serious programmers.
 - "sl/meta/match.hpp"
     - match statement and mapping, can be bidirectional
     - pattern matching for typical sum-types (variant/expected/optional/ptr)
+- "sl/meta/hash.hpp"
+    - fnv1a: constexpr hash function (TODO: more)
+    - hash_string_view: string_view with precalculated hash
 
 - "sl/meta/string.hpp" 
     - string that can be used as template parameter
@@ -30,7 +33,5 @@ For serious programmers.
     - different flavours of for_each in tuple
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors
-- "sl/meta/hash.hpp"
-    - constexpr hash functions
 - "sl/meta/storage.hpp"
     - persistent storage of items with unique identifiers

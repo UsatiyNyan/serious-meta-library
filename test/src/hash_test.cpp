@@ -18,4 +18,10 @@ TEST(hash, fnv1a) {
     static_assert(fnv1a<std::uint32_t>("0123456789ABCDEF"sv) == 0xe9cb8efd, "Test failed!");
 }
 
+TEST(hashStringView, literal) {
+    static_assert("ora"_hsv.hash() == 0x19fb8e1921bfa2bf);
+    static_assert("ora"_hsv == "ora"_hsv);
+    static_assert("oraora"_hsv != "ora"_hsv);
+}
+
 } // namespace sl::meta

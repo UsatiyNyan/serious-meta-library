@@ -41,6 +41,7 @@ For serious programmers.
 - "sl/meta/memory.hpp"
     - aligned: type for alignas
     - aggregate: memory traits
+    - allocator: supports injection
 - "sl/meta/conn.hpp"
     - TODO: deprecate and move to exec
     - attempts at formulation of signal/slot architecture

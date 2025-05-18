@@ -2,10 +2,11 @@
 // Created by usatiynyan.
 //
 
-#include "sl/meta/func/undefined.hpp"
-#include "sl/meta/type/list.hpp"
+#include "sl/meta/type.hpp"
+#include <tl/expected.hpp>
 
 #include <gtest/gtest.h>
+#include <type_traits>
 
 namespace sl::meta {
 
@@ -38,6 +39,17 @@ TEST(type, areSame) {
     static_assert(!type::are_same_v<short, int>);
     static_assert(!type::are_same_v<int, int, char, int>);
     static_assert(!type::are_same_v<int, std::string, char>);
+}
+
+TEST(type, undefined) {
+    static_assert(!std::is_constructible_v<undefined>);
+
+    using expected_type = tl::expected<std::string, undefined>;
+    static_assert(std::constructible_from<expected_type, std::string>);
+
+    expected_type expected{ "hehe" };
+    // expected.emplace(undefined{}); // compilation error :3
+    // expected = tl::unexpected(undefined{}); // compilation error :3
 }
 
 } // namespace sl::meta

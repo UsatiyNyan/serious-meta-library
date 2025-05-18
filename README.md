@@ -7,6 +7,9 @@ For serious programmers.
     - unique: inheritance tags and concepts for default c-tors and assignment op-s
     - constructible, count_fields: field counting for aggregate types
     - concept, is_specialization: compile-time checks
+- "sl/meta/type.hpp"
+    - unit, identity, undefined - fundamental types
+    - lazy, const, pack - type evaluation/operations
 
 - "sl/meta/string.hpp" 
     - string that can be used as template parameter

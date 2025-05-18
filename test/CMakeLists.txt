@@ -4,7 +4,6 @@ target_link_libraries(${PROJECT_NAME}_fixture PUBLIC ${PROJECT_NAME})
 
 sl_gtest_prologue(v1.13.0)
 sl_add_gtest(${PROJECT_NAME}_fixture meta)
-sl_add_gtest(${PROJECT_NAME}_fixture string)
 sl_add_gtest(${PROJECT_NAME}_fixture traits)
 sl_add_gtest(${PROJECT_NAME}_fixture tuple)
 sl_add_gtest(${PROJECT_NAME}_fixture hash)

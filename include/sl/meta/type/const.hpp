@@ -1,15 +1,12 @@
 //
-// Created by usatiynyan on 01/19/24.
+// Created by usatiynyan.
 //
 
 #pragma once
 
 #include <type_traits>
 
-namespace sl::meta {
-
-template <typename T, typename...>
-struct const_t : T {};
+namespace sl::meta::type {
 
 template <typename T, bool cond>
 using add_const_if = std::conditional_t<cond, std::add_const<T>, std::type_identity<T>>;

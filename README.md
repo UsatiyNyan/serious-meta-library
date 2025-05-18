@@ -26,10 +26,10 @@ For serious programmers.
 - "sl/meta/hash.hpp"
     - fnv1a: constexpr hash function (TODO: more)
     - hash_string_view: string_view with precalculated hash
-
 - "sl/meta/tuple.hpp"
-    - tie_as_tuple for structs, see tests for more examples
-    - different flavours of for_each in tuple
+    - tie_as_tuple: tie an aggregate as tuple (see tests)
+    - decay, enumerate, for_each, for_each_type: utilities
+
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors
 - "sl/meta/storage.hpp"

@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "sl/meta/lifetime/immovable.hpp"
 #include "sl/meta/monad/maybe.hpp"
+#include "sl/meta/traits/unique.hpp"
 #include "sl/meta/type/const.hpp"
 
 #include <range/v3/size.hpp>
@@ -25,8 +25,8 @@ struct persistent_array_cell {
 
 template <typename T, template <typename> typename Alloc, bool IsConst>
 class persistent_array {
-    using memory_type = add_const_if_t<std::vector<T, Alloc<T>>, IsConst>;
-    using deref_type = add_const_if_t<T, IsConst>;
+    using memory_type = type::add_const_if_t<std::vector<T, Alloc<T>>, IsConst>;
+    using deref_type = type::add_const_if_t<T, IsConst>;
 
 public:
     persistent_array(memory_type& memory, persistent_array_cell cell) : cell_{ cell }, memory_{ &memory } {}

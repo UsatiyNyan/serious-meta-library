@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "sl/meta/lifetime/immovable.hpp"
+#include "sl/meta/hash/string_view.hpp"
 #include "sl/meta/monad/maybe.hpp"
-#include "sl/meta/string/hash_view.hpp"
+#include "sl/meta/traits/unique.hpp"
 
 #include <libassert/assert.hpp>
 #include <tsl/robin_map.h>

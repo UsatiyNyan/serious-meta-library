@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "sl/meta/lifetime/immovable.hpp"
 #include "sl/meta/monad/maybe.hpp"
+#include "sl/meta/traits/unique.hpp"
 #include "sl/meta/type/const.hpp"
 
 #include <tsl/robin_map.h>
@@ -18,8 +18,8 @@ namespace detail {
 
 template <typename T, template <typename> typename Alloc, bool IsConst>
 class persistent {
-    using memory_type = add_const_if_t<std::vector<T, Alloc<T>>, IsConst>;
-    using deref_type = add_const_if_t<T, IsConst>;
+    using memory_type = type::add_const_if_t<std::vector<T, Alloc<T>>, IsConst>;
+    using deref_type = type::add_const_if_t<T, IsConst>;
 
 public:
     persistent(memory_type& memory, std::size_t address) : memory_{ &memory }, address_{ address } {}

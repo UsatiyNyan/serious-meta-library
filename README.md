@@ -35,8 +35,9 @@ For serious programmers.
 - "sl/meta/intrusive.hpp"
     - forward_list: node and non-owning container
     - algorithm: node
+- "sl/meta/storage.hpp"
+    - persistent, persistent_array: persistent storage of items with unique identifiers
+    - unique_string: persistent storage for unique strings
 
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors
-- "sl/meta/storage.hpp"
-    - persistent storage of items with unique identifiers

@@ -1,5 +1,5 @@
 //
-// Created by usatiynyan on 12/17/23.
+// Created by usatiynyan.
 //
 
 #pragma once
@@ -25,19 +25,8 @@ constexpr std::size_t sum_of_field_sizes() {
     return std::apply([](auto... size_of_field) -> std::size_t { return (size_of_field + ... + 0); }, sizes_of_fields);
 }
 
+// lies a bit, since sizeof(bool) == 1 byte.
 template <typename AggregateT>
 constexpr bool is_tightly_packed = sizeof(AggregateT) == sum_of_field_sizes<AggregateT>();
-
-template <typename T, typename AlignAsT>
-struct aligned_field {
-    static_assert(alignof(AlignAsT) >= sizeof(T));
-    alignas(AlignAsT) T value;
-};
-
-template <typename T, std::size_t N, typename AlignAsT>
-struct aligned_field<T[N], AlignAsT> {
-    static_assert(alignof(AlignAsT) >= sizeof(T));
-    alignas(AlignAsT) T value[N];
-};
 
 } // namespace sl::meta

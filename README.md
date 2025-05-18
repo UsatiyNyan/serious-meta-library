@@ -38,6 +38,7 @@ For serious programmers.
 - "sl/meta/storage.hpp"
     - persistent, persistent_array: persistent storage of items with unique identifiers
     - unique_string: persistent storage for unique strings
+- "sl/meta/memory.hpp"
+    - aligned: type for alignas
+    - aggregate: memory traits
 
-- "sl/meta/field.hpp"
-    - struct/aggregate field descriptors

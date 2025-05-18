@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "sl/meta/lifetime/unique.hpp"
+#include "sl/meta/traits/unique.hpp"
 
 #include "sl/meta/func/function.hpp"
 
 namespace sl::meta {
 template <typename Capacity = fu2::capacity_default>
 struct defer : unique {
-    using impl_type = unique_function<void(), Capacity>;
+    using function_type = unique_function<void(), Capacity>;
 
 public:
     defer(defer&& other) noexcept : f_{ std::exchange(other.f_, nullptr) } {}
@@ -23,7 +23,7 @@ public:
         return *this;
     }
 
-    explicit defer(impl_type f) : f_(std::move(f)) {}
+    explicit defer(function_type f) : f_(std::move(f)) {}
     ~defer() noexcept { call(); }
 
 private:
@@ -34,7 +34,7 @@ private:
     }
 
 private:
-    impl_type f_{};
+    function_type f_{};
 };
 
 template <typename F>

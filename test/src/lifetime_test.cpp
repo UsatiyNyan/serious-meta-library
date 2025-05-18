@@ -65,12 +65,12 @@ TEST(lifetime, derefPtr) {
         auto ptr = new fixture::lifecycle{ "ptr" };
         defer ptr_delete{ [ptr] { delete ptr; } };
 
-        { auto copied_value = deref<decltype(ptr)&>(ptr); }
+        { auto copied_value = deref(ptr); }
         const std::vector expected_copied_states{ fixture::lifecycle::state::copy_constructed,
                                                   fixture::lifecycle::state::destructed };
         EXPECT_EQ(fixture::lifecycle::states["ptr_copied"], expected_copied_states);
 
-        { auto moved_value = deref<decltype(ptr)&&>(std::move(ptr)); }
+        { auto moved_value = deref(std::move(ptr)); }
         const std::vector expected_moved_states{ fixture::lifecycle::state::move_constructed,
                                                  fixture::lifecycle::state::destructed };
         EXPECT_EQ(fixture::lifecycle::states["ptr_moved"], expected_moved_states);
@@ -89,12 +89,12 @@ TEST(lifetime, forwardDerefUniquePtr) {
     {
         auto ptr = std::make_unique<fixture::lifecycle>("ptr");
 
-        { auto copied_value = deref<decltype(ptr)&>(ptr); }
+        { auto copied_value = deref(ptr); }
         const std::vector expected_copied_states{ fixture::lifecycle::state::copy_constructed,
                                                   fixture::lifecycle::state::destructed };
         EXPECT_EQ(fixture::lifecycle::states["ptr_copied"], expected_copied_states);
 
-        { auto moved_value = deref<decltype(ptr)&&>(std::move(ptr)); }
+        { auto moved_value = deref(std::move(ptr)); }
         const std::vector expected_moved_states{ fixture::lifecycle::state::move_constructed,
                                                  fixture::lifecycle::state::destructed };
         EXPECT_EQ(fixture::lifecycle::states["ptr_moved"], expected_moved_states);
@@ -113,12 +113,12 @@ TEST(lifetime, forwardDerefSharedPtr) {
     {
         auto ptr = std::make_shared<fixture::lifecycle>("ptr");
 
-        { auto copied_value = deref<decltype(ptr)&>(ptr); }
+        { auto copied_value = deref(ptr); }
         const std::vector expected_copied_states{ fixture::lifecycle::state::copy_constructed,
                                                   fixture::lifecycle::state::destructed };
         EXPECT_EQ(fixture::lifecycle::states["ptr_copied"], expected_copied_states);
 
-        { auto moved_value = deref<decltype(ptr)&&>(std::move(ptr)); }
+        { auto moved_value = deref(std::move(ptr)); }
         const std::vector expected_moved_states{ fixture::lifecycle::state::move_constructed,
                                                  fixture::lifecycle::state::destructed };
         EXPECT_EQ(fixture::lifecycle::states["ptr_moved"], expected_moved_states);

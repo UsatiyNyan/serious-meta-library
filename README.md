@@ -16,16 +16,15 @@ For serious programmers.
 - "sl/meta/func.hpp"
     - type alias for function
     - pipeline, lift, lazy_eval: utilities
+- "sl/meta/lifetime.hpp"
+    - defer, finalizer: stack-based resource lifetime management
+    - deref: correct perfect pointer forwarding
 
 - "sl/meta/string.hpp" 
     - string that can be used as template parameter
 - "sl/meta/tuple.hpp"
     - tie_as_tuple for structs, see tests for more examples
     - different flavours of for_each in tuple
-- "sl/meta/lifetime.hpp"
-    - stack-based resource lifetime management
-    - correct pointer forwarding
-    - lazy evaluation
 - "sl/meta/field.hpp"
     - struct/aggregate field descriptors
 - "sl/meta/hash.hpp"

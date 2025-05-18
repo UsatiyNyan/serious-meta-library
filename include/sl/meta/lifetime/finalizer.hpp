@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "sl/meta/lifetime/unique.hpp"
+#include "sl/meta/traits/unique.hpp"
 
 #include "sl/meta/func/function.hpp"
 

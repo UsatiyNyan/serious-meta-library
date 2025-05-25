@@ -15,6 +15,12 @@ namespace sl::meta {
 template <typename T, typename E>
 using result = ::tl::expected<T, E>;
 
+using ok_tag_t = ::tl::in_place_t;
+constexpr ok_tag_t ok_tag;
+
+using err_tag_t = ::tl::unexpect_t;
+constexpr err_tag_t err_tag;
+
 template <typename TV>
 constexpr auto ok(TV&& v) {
     using T = std::decay_t<TV>;

@@ -33,8 +33,9 @@ For serious programmers.
     - to/from string
     - flag
 - "sl/meta/intrusive.hpp"
-    - forward_list: node and non-owning container
-    - algorithm: node
+    - forward_list: singly linked node and non-owning container
+    - list: doubly linked node and non-owning container
+    - algorithm: singly linked node ops
 - "sl/meta/storage.hpp"
     - persistent, persistent_array: persistent storage of items with unique identifiers
     - unique_string: persistent storage for unique strings

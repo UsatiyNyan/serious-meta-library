@@ -27,7 +27,7 @@ class intrusive_forward_list {
 public:
     using node_type = intrusive_forward_list_node<T>;
     template <bool is_const>
-    class iterator;
+    struct iterator;
 
     intrusive_forward_list() = default;
 
@@ -86,13 +86,16 @@ public:
         node_type* prev_head = m_.head;
         if (m_.head == m_.tail) {
             m_.head = m_.tail = nullptr;
+            DEBUG_ASSERT(prev_head->intrusive_next == nullptr);
         } else {
             m_.head = m_.head->intrusive_next;
+            prev_head->intrusive_next = nullptr;
         }
-        prev_head->intrusive_next = nullptr;
 
         return prev_head->downcast();
     }
+
+    T* front() const { return m_.head == nullptr ? nullptr : m_.head->downcast(); }
 
     void clear() { m_ = m_type{}; }
     auto size() const { return m_.size; }
@@ -117,16 +120,20 @@ private:
 
 template <typename T>
 template <bool is_const>
-class intrusive_forward_list<T>::iterator {
+struct intrusive_forward_list<T>::iterator {
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T*;
+    using reference = T&;
+
     using qualified_node_type = type::add_const_if_t<node_type, is_const>;
 
-    friend class intrusive_forward_list<T>;
-    explicit iterator(qualified_node_type* node) : node_{ node }, next_{ maybe_next(node_) } {}
-
 public:
+    explicit iterator(qualified_node_type* node = nullptr) : node_{ node } {}
+
     auto operator++() {
-        node_ = next_;
-        next_ = maybe_next(node_);
+        node_ = node_->intrusive_next;
         return *this;
     }
     auto operator++(int) {
@@ -135,8 +142,8 @@ public:
         return tmp;
     }
 
-    auto& operator*() const { return *node_->downcast(); }
-    auto* operator->() const { return node_->downcast(); }
+    T& operator*() const { return *node_->downcast(); }
+    T* operator->() const { return node_->downcast(); }
 
     template <bool other_is_const>
     bool operator==(const iterator<other_is_const>& other) const {
@@ -144,13 +151,7 @@ public:
     }
 
 private:
-    static qualified_node_type* maybe_next(qualified_node_type* node) {
-        return node == nullptr ? nullptr : node->intrusive_next;
-    }
-
-private:
     qualified_node_type* node_;
-    qualified_node_type* next_;
 };
 
 } // namespace sl::meta

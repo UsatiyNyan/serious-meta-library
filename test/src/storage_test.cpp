@@ -78,7 +78,7 @@ TEST(storage, persistentNesting) {
         std::ignore = outer.emplace(key, "outer");
 
         {
-            persistent_storage<std::string, fixture::lifecycle> inner{ { .parent = outer } };
+            persistent_storage<std::string, fixture::lifecycle> inner{ { .get_parent = [&] { return &outer; } } };
             const std::string inner_key{ "mudamuda" };
 
             {
@@ -220,8 +220,9 @@ TEST(storage, persistentArrayNesting) {
         std::ignore = outer.emplace(key, persistent_array_producer(inserted_persistent_array));
 
         {
-            persistent_array_storage<std::string, fixture::lifecycle> inner{ { .parent = outer,
-                                                                               .memory_capacity = 128 } };
+            persistent_array_storage<std::string, fixture::lifecycle> inner{
+                { .get_parent = [&] { return &outer; }, .memory_capacity = 128 },
+            };
             const std::string inner_key{ "mudamuda" };
 
             {
@@ -323,7 +324,7 @@ TEST(storage, uniqueStringNesting) {
     std::ignore = outer.emplace("oraora"_hsv);
 
     {
-        unique_string_storage inner{ { .parent = outer } };
+        unique_string_storage inner{ { .get_parent = [&] { return &outer; } } };
         std::ignore = inner.emplace("mudamuda"_hsv);
 
         {

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "sl/meta/func/function.hpp"
 #include "sl/meta/hash/string_view.hpp"
 #include "sl/meta/monad/maybe.hpp"
 #include "sl/meta/traits/unique.hpp"
@@ -91,8 +92,10 @@ struct basic_unique_string_storage : immovable {
         /*KeyEqual=*/std::equal_to<>,
         /*Allocator=*/table_alloc_type>;
 
+    using get_parent_type = unique_function<const basic_unique_string_storage*() const>;
+
     struct init_type {
-        maybe<const basic_unique_string_storage&> parent = null;
+        get_parent_type get_parent = {};
         std::size_t memory_capacity = 0;
         std::size_t table_capacity = 0;
         const memory_alloc_type& memory_alloc = {};
@@ -101,7 +104,8 @@ struct basic_unique_string_storage : immovable {
 
 public:
     explicit basic_unique_string_storage(init_type init = {})
-        : memory_{ init.memory_alloc }, table_{ init.table_capacity, init.table_alloc }, parent_{ init.parent } {
+        : memory_{ init.memory_alloc }, table_{ init.table_capacity, init.table_alloc },
+          get_parent_{ std::move(init.get_parent) } {
         memory_.reserve(init.memory_capacity);
     }
 
@@ -112,12 +116,13 @@ public:
         if (const auto cell_it = table_.find(str_id); cell_it != table_.end()) {
             return value_type{ memory_, cell_it.value(), str_id.hash() };
         }
-        if (parent_recursion_limit == 0) {
+        if (parent_recursion_limit == 0 || !get_parent_) {
             return null;
         }
-        return parent_.and_then([&str_id, &parent_recursion_limit](const basic_unique_string_storage& p) {
-            return p.lookup(str_id, parent_recursion_limit - 1);
-        });
+        if (auto* parent = get_parent_()) {
+            return parent->lookup(str_id, parent_recursion_limit - 1);
+        }
+        return null;
     }
 
     [[nodiscard]] maybe<value_type> lookup(
@@ -179,7 +184,7 @@ public:
 private:
     memory_type memory_;
     table_type table_;
-    meta::maybe<const basic_unique_string_storage&> parent_;
+    get_parent_type get_parent_;
 };
 
 

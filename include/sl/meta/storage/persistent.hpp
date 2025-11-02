@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "sl/meta/func/function.hpp"
 #include "sl/meta/monad/maybe.hpp"
 #include "sl/meta/traits/unique.hpp"
 #include "sl/meta/type/const.hpp"
@@ -61,8 +62,10 @@ struct persistent_storage : immovable {
     using table_alloc_type = Alloc<std::pair<Id, std::size_t>>;
     using table_type = tsl::robin_map<Id, std::size_t, Hash<Id>, Equal<Id>, table_alloc_type>;
 
+    using get_parent_type = unique_function<persistent_storage*() const>;
+
     struct init_type {
-        maybe<persistent_storage&> parent = null;
+        get_parent_type get_parent = {};
         std::size_t memory_capacity = 0;
         std::size_t table_capacity = 0;
         const memory_alloc_type& memory_alloc = {};
@@ -71,7 +74,7 @@ struct persistent_storage : immovable {
 
 public:
     explicit persistent_storage(init_type init = {})
-        : memory_{ init.memory_alloc }, table_{ init.table_capacity }, parent_{ init.parent } {
+        : memory_{ init.memory_alloc }, table_{ init.table_capacity }, get_parent_{ std::move(init.get_parent) } {
         memory_.reserve(init.memory_capacity);
     }
 
@@ -116,12 +119,13 @@ private:
         if (const auto address_it = self.table_.find(item_id); address_it != self.table_.end()) {
             return detail::persistent<T, Alloc, IsConst>{ self.memory_, address_it.value() };
         }
-        if (parent_recursion_limit == 0) {
+        if (parent_recursion_limit == 0 || !self.get_parent_) {
             return null;
         }
-        return self.parent_.and_then([&item_id, &parent_recursion_limit](Self& p) {
-            return lookup_impl(p, item_id, parent_recursion_limit - 1);
-        });
+        if (auto* parent = self.get_parent_()) {
+            return lookup_impl(*parent, item_id, parent_recursion_limit - 1);
+        }
+        return null;
     }
 
     std::pair<value_type, bool> new_addr_impl(const Id& id) {
@@ -133,7 +137,7 @@ private:
 private:
     memory_type memory_;
     table_type table_;
-    maybe<persistent_storage&> parent_;
+    get_parent_type get_parent_;
 };
 
 } // namespace sl::meta

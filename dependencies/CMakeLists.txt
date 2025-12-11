@@ -15,22 +15,6 @@ cpmaddpackage(
         GIT_REPOSITORY "git@github.com:jeremy-rifkin/libassert.git"
         GIT_TAG v2.0.1)
 cpmaddpackage(
-        NAME tl-optional
-        GIT_REPOSITORY "git@github.com:TartanLlama/optional.git"
-        GIT_TAG v1.1.0
-        OPTIONS
-        "OPTIONAL_BUILD_TESTS OFF"
-        "OPTIONAL_BUILD_PACKAGE OFF"
-        )
-cpmaddpackage(
-        NAME tl-expected
-        GIT_REPOSITORY "git@github.com:TartanLlama/expected.git"
-        GIT_TAG v1.1.0
-        OPTIONS
-        "EXPECTED_BUILD_TESTS OFF"
-        "EXPECTED_BUILD_PACKAGE OFF"
-        )
-cpmaddpackage(
         NAME fmt
         GIT_REPOSITORY "git@github.com:fmtlib/fmt.git"
         GIT_TAG 10.1.1)
@@ -38,8 +22,6 @@ cpmaddpackage(
 sl_target_link_system_libraries(${PROJECT_NAME}
         INTERFACE
         function2::function2
-        tl::optional
-        tl::expected
         range-v3::range-v3
         tsl::robin_map
         libassert::assert

@@ -6,6 +6,8 @@
 
 #include "sl/meta/traits/unique.hpp"
 
+#include "sl/meta/traits/invocable.hpp"
+
 #include "sl/meta/traits/constructible.hpp"
 #include "sl/meta/traits/count_fields.hpp"
 

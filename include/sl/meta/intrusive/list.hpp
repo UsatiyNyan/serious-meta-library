@@ -192,10 +192,15 @@ struct intrusive_list<T>::iterator {
     using qualified_node_type = type::add_const_if_t<node_type, is_const>;
 
 public:
-    explicit iterator(qualified_node_type* node = nullptr) : node_{ node } {}
+    explicit iterator(qualified_node_type* node = nullptr)
+        : node_{ node }, //
+          next_{ node ? node->intrusive_next : nullptr }, //
+          prev_{ node ? node->intrusive_prev : nullptr } {}
 
     auto operator++() {
-        node_ = node_->intrusive_next;
+        prev_ = node_;
+        node_ = next_;
+        next_ = next_ ? next_->intrusive_next : nullptr;
         return *this;
     }
     auto operator++(int) {
@@ -205,7 +210,9 @@ public:
     }
 
     auto operator--() {
-        node_ = node_->intrusive_prev;
+        next_ = node_;
+        node_ = prev_;
+        prev_ = prev_ ? prev_->intrusive_prev : nullptr;
         return *this;
     }
     auto operator--(int) {
@@ -224,6 +231,8 @@ public:
 
 private:
     qualified_node_type* node_;
+    qualified_node_type* next_;
+    qualified_node_type* prev_;
 };
 
 } // namespace sl::meta

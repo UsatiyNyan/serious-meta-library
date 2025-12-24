@@ -130,10 +130,13 @@ struct intrusive_forward_list<T>::iterator {
     using qualified_node_type = type::add_const_if_t<node_type, is_const>;
 
 public:
-    explicit iterator(qualified_node_type* node = nullptr) : node_{ node } {}
+    explicit iterator(qualified_node_type* node = nullptr)
+        : node_{ node }, //
+          next_{ node ? node->intrusive_next : nullptr } {}
 
     auto operator++() {
-        node_ = node_->intrusive_next;
+        node_ = next_;
+        next_ = next_ ? next_->intrusive_next : nullptr;
         return *this;
     }
     auto operator++(int) {
@@ -152,6 +155,7 @@ public:
 
 private:
     qualified_node_type* node_;
+    qualified_node_type* next_;
 };
 
 } // namespace sl::meta

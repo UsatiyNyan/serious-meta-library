@@ -9,11 +9,11 @@ cpmaddpackage(
 cpmaddpackage(
         NAME tsl-robin-map
         GIT_REPOSITORY "git@github.com:Tessil/robin-map"
-        GIT_TAG v1.3.0)
+        GIT_TAG v1.4.1)
 cpmaddpackage(
         NAME libassert
         GIT_REPOSITORY "git@github.com:jeremy-rifkin/libassert.git"
-        GIT_TAG v2.0.1)
+        GIT_TAG v2.2.1)
 cpmaddpackage(
         NAME tl-optional
         GIT_REPOSITORY "git@github.com:TartanLlama/optional.git"

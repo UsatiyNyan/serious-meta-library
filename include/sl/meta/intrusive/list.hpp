@@ -7,8 +7,7 @@
 #pragma once
 
 #include "sl/meta/type/const.hpp"
-
-#include <libassert/assert.hpp>
+#include "sl/meta/assert.hpp"
 
 #include <utility>
 

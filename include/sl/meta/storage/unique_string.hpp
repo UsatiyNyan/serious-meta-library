@@ -4,12 +4,12 @@
 
 #pragma once
 
+#include "sl/meta/assert.hpp"
 #include "sl/meta/func/function.hpp"
 #include "sl/meta/hash/string_view.hpp"
 #include "sl/meta/monad/maybe.hpp"
 #include "sl/meta/traits/unique.hpp"
 
-#include <libassert/assert.hpp>
 #include <tsl/robin_map.h>
 
 #include <cstddef>
@@ -151,13 +151,7 @@ public:
         const auto [cell_it, is_cell_emplaced] = table_.try_emplace(value, cell);
 
         // handle ambiguous case
-        if (!ASSUME_VAL(
-                is_cell_emplaced,
-                "cell was not found in lookup previously, should not ever happen",
-                sv,
-                cell_it.value(),
-                cell
-            )) {
+        if (!ASSERT_VAL(is_cell_emplaced, "cell was not found in lookup previously, should not ever happen", sv)) {
             memory_.erase(std::prev(memory_.end(), static_cast<std::ptrdiff_t>(sv.size())), memory_.end());
             return std::make_pair(value_type{ memory_, cell, hash }, false);
         }

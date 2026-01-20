@@ -6,8 +6,7 @@
 
 #include "sl/meta/monad/maybe.hpp"
 #include "sl/meta/traits/unique.hpp"
-
-#include <libassert/assert.hpp>
+#include "sl/meta/assert.hpp"
 
 namespace sl::meta {
 

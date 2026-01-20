@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "sl/meta/assert.hpp"
 #include "sl/meta/conn.hpp"
 #include "sl/meta/enum.hpp"
 #include "sl/meta/func.hpp"

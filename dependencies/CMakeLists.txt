@@ -11,10 +11,6 @@ cpmaddpackage(
         GIT_REPOSITORY "git@github.com:Tessil/robin-map"
         GIT_TAG v1.4.1)
 cpmaddpackage(
-        NAME libassert
-        GIT_REPOSITORY "git@github.com:jeremy-rifkin/libassert.git"
-        GIT_TAG v2.2.1)
-cpmaddpackage(
         NAME tl-optional
         GIT_REPOSITORY "git@github.com:TartanLlama/optional.git"
         GIT_TAG v1.1.0
@@ -33,7 +29,7 @@ cpmaddpackage(
 cpmaddpackage(
         NAME fmt
         GIT_REPOSITORY "git@github.com:fmtlib/fmt.git"
-        GIT_TAG 10.1.1)
+        GIT_TAG 12.1.0)
 
 sl_target_link_system_libraries(${PROJECT_NAME}
         INTERFACE
@@ -42,6 +38,5 @@ sl_target_link_system_libraries(${PROJECT_NAME}
         tl::expected
         range-v3::range-v3
         tsl::robin_map
-        libassert::assert
         fmt::fmt
 )

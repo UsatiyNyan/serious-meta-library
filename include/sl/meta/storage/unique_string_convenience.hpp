@@ -32,7 +32,7 @@ template <typename C, template <typename> typename Traits, template <typename> t
 struct fmt::formatter<sl::meta::basic_unique_string<C, Traits, Alloc>>
     : fmt::formatter<std::basic_string_view<C, Traits<C>>> {
     template <typename Context>
-    constexpr format_context::iterator format(const sl::meta::basic_unique_string<C, Traits, Alloc>& us, Context& ctx) {
+    constexpr format_context::iterator format(const sl::meta::basic_unique_string<C, Traits, Alloc>& us, Context& ctx) const {
         return fmt::formatter<std::basic_string_view<C, Traits<C>>>::format(us.string_view(), ctx);
     }
 };

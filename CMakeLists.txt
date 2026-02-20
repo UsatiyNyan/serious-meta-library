@@ -13,7 +13,7 @@ sl_project_prologue(
     CXX_STANDARD 23)
 project(
         serious-meta-library
-        VERSION 1.1.0
+        VERSION 1.2.0
         DESCRIPTION "metaprogramming library"
         HOMEPAGE_URL "TODO"
         LANGUAGES CXX)
@@ -21,8 +21,21 @@ project(
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(sl::meta ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} INTERFACE include)
-
 add_subdirectory(dependencies)
+
+# setup detected 
+sl_detect_machine_cpu(SL_DETECTED_MACHINE_CPU)
+sl_detect_compiler(SL_DETECTED_COMPILER)
+sl_detect_os(SL_DETECTED_OS)
+target_compile_definitions(${PROJECT_NAME}
+   INTERFACE
+   SL_CPU=${SL_DETECTED_MACHINE_CPU}
+   "SL_CPU_IS_${SL_DETECTED_MACHINE_CPU}"
+   SL_COMPILER=${SL_DETECTED_COMPILER}
+   "SL_COMPILER_IS_${SL_DETECTED_COMPILER}"
+   SL_OS=${SL_DETECTED_OS}
+   "SL_OS_IS_${SL_DETECTED_OS}"
+)
 
 # tie as tuple generation
 include(cmake/generate_tie_as_tuple.cmake)

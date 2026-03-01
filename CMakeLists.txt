@@ -13,7 +13,7 @@ sl_project_prologue(
     CXX_STANDARD 23)
 project(
         serious-meta-library
-        VERSION 1.2.0
+        VERSION 1.2.1
         DESCRIPTION "metaprogramming library"
         HOMEPAGE_URL "TODO"
         LANGUAGES CXX)
@@ -23,7 +23,7 @@ add_library(sl::meta ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} INTERFACE include)
 add_subdirectory(dependencies)
 
-# setup detected 
+# setup detected
 sl_detect_machine_cpu(SL_DETECTED_MACHINE_CPU)
 sl_detect_compiler(SL_DETECTED_COMPILER)
 sl_detect_os(SL_DETECTED_OS)
@@ -47,6 +47,19 @@ include(cmake/generate_tie_as_tuple.cmake)
 set(SL_GENERATE_N_FIELDS 64 CACHE STRING "Max amount of fields to generate tie_as_tuple for")
 sl_generate_tie_as_tuple(${SL_GENERATE_N_FIELDS})
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# sanitizers
+set(CACHE{SL_SANITIZER} TYPE STRING HELP "Sanitizer to turn on, options are: address, thread")
+if ("${SL_SANITIZER}" STREQUAL "")
+elseif("${SL_SANITIZER}" STREQUAL "address")
+    target_compile_options(${target} INTERFACE -fsanitize=address,undefined -fno-sanitize-recover=all)
+    target_link_options(${target} INTERFACE -fsanitize=address,undefined)
+elseif("${SL_SANITIZER}" STREQUAL "thread")
+    target_compile_options(${target} INTERFACE -fsanitize=thread -fno-sanitize-recover=all)
+    target_link_options(${target} INTERFACE -fsanitize=thread)
+else()
+    message(FATAL_ERROR "incorrect SL_SANITIZER option: ${SL_SANITIZER}")
+endif()
 
 # test fixture
 add_subdirectory(fixture)

@@ -13,7 +13,7 @@ sl_project_prologue(
     CXX_STANDARD 23)
 project(
         serious-meta-library
-        VERSION 1.2.1
+        VERSION 1.2.2
         DESCRIPTION "metaprogramming library"
         HOMEPAGE_URL "TODO"
         LANGUAGES CXX)
@@ -28,9 +28,9 @@ sl_detect_machine_cpu(SL_DETECTED_MACHINE_CPU)
 sl_detect_compiler(SL_DETECTED_COMPILER)
 sl_detect_os(SL_DETECTED_OS)
 
-set(CACHE{SL_DETECTED_MACHINE_CPU} INTERNAL "${SL_DETECTED_MACHINE_CPU}")
-set(CACHE{SL_DETECTED_COMPILER} INTERNAL "${SL_DETECTED_COMPILER}")
-set(CACHE{SL_DETECTED_OS} INTERNAL "${SL_DETECTED_OS}")
+set(SL_DETECTED_MACHINE_CPU "${SL_DETECTED_MACHINE_CPU}" CACHE INTERNAL "" FORCE)
+set(SL_DETECTED_COMPILER "${SL_DETECTED_COMPILER}" CACHE INTERNAL "" FORCE)
+set(SL_DETECTED_OS "${SL_DETECTED_OS}" CACHE INTERNAL "" FORCE)
 
 target_compile_definitions(${PROJECT_NAME}
    INTERFACE
@@ -43,20 +43,22 @@ target_compile_definitions(${PROJECT_NAME}
 )
 
 # tie as tuple generation
-include(cmake/generate_tie_as_tuple.cmake)
 set(SL_GENERATE_N_FIELDS 64 CACHE STRING "Max amount of fields to generate tie_as_tuple for")
+include(cmake/generate_tie_as_tuple.cmake)
 sl_generate_tie_as_tuple(${SL_GENERATE_N_FIELDS})
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # sanitizers
-set(CACHE{SL_SANITIZER} TYPE STRING HELP "Sanitizer to turn on, options are: address, thread")
+set(SL_SANITIZER "" CACHE STRING "Sanitizer to turn on, options are: address, thread")
 if ("${SL_SANITIZER}" STREQUAL "")
 elseif("${SL_SANITIZER}" STREQUAL "address")
-    target_compile_options(${target} INTERFACE -fsanitize=address,undefined -fno-sanitize-recover=all)
-    target_link_options(${target} INTERFACE -fsanitize=address,undefined)
+    message(STATUS "${PROJECT_NAME} address sanitizer enabled")
+    target_compile_options(${PROJECT_NAME} INTERFACE -fsanitize=address,undefined -fno-sanitize-recover=all)
+    target_link_options(${PROJECT_NAME} INTERFACE -fsanitize=address,undefined)
 elseif("${SL_SANITIZER}" STREQUAL "thread")
-    target_compile_options(${target} INTERFACE -fsanitize=thread -fno-sanitize-recover=all)
-    target_link_options(${target} INTERFACE -fsanitize=thread)
+    message(STATUS "${PROJECT_NAME} thread sanitizer enabled")
+    target_compile_options(${PROJECT_NAME} INTERFACE -fsanitize=thread -fno-sanitize-recover=all)
+    target_link_options(${PROJECT_NAME} INTERFACE -fsanitize=thread)
 else()
     message(FATAL_ERROR "incorrect SL_SANITIZER option: ${SL_SANITIZER}")
 endif()

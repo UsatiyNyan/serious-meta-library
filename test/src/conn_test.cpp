@@ -118,4 +118,150 @@ TEST(conn, dirty) {
     }
 }
 
+TEST(reactive, ctorInv) {
+    {
+        reactive::state<int> s{};
+        auto o = s.make_observer();
+        EXPECT_FALSE(o.has_update());
+        EXPECT_FALSE(o.peek().has_value());
+        EXPECT_FALSE(o.consume().has_value());
+    }
+    {
+        reactive::state<int> s{ 42 };
+        auto o = s.make_observer();
+        EXPECT_TRUE(o.has_update());
+        EXPECT_EQ(o.peek(), 42);
+        EXPECT_EQ(o.consume(), 42);
+    }
+}
+
+TEST(reactive, set) {
+    reactive::state<int> s{};
+    auto o = s.make_observer();
+
+    EXPECT_FALSE(o.has_update());
+    EXPECT_FALSE(o.peek().has_value());
+
+    std::size_t v0 = s.set(42);
+    EXPECT_TRUE(o.has_update());
+    EXPECT_EQ(o.peek(), 42);
+
+    std::size_t v1 = s.set(100);
+    EXPECT_GT(v1, v0);
+    EXPECT_TRUE(o.has_update());
+    EXPECT_EQ(o.peek(), 100);
+}
+
+TEST(reactive, consume) {
+    reactive::state<int> s{};
+    auto o = s.make_observer();
+
+    s.set(1);
+    EXPECT_TRUE(o.has_update());
+    EXPECT_EQ(o.consume(), 1);
+    EXPECT_FALSE(o.has_update());
+
+    // peek still works after consume
+    EXPECT_EQ(o.peek(), 1);
+
+    // consume returns null when no update
+    EXPECT_FALSE(o.consume().has_value());
+
+    // new update is visible
+    s.set(2);
+    EXPECT_TRUE(o.has_update());
+    EXPECT_EQ(o.consume(), 2);
+    EXPECT_FALSE(o.has_update());
+}
+
+TEST(reactive, multipleObservers) {
+    reactive::state<int> s{ 0 };
+    auto o1 = s.make_observer();
+    auto o2 = s.make_observer();
+
+    EXPECT_TRUE(o1.has_update());
+    EXPECT_TRUE(o2.has_update());
+
+    EXPECT_EQ(o1.consume(), 0);
+    EXPECT_FALSE(o1.has_update());
+    EXPECT_TRUE(o2.has_update());
+
+    s.set(42);
+    EXPECT_TRUE(o1.has_update());
+    EXPECT_TRUE(o2.has_update());
+
+    EXPECT_EQ(o1.consume(), 42);
+    EXPECT_EQ(o2.consume(), 42);
+    EXPECT_FALSE(o1.has_update());
+    EXPECT_FALSE(o2.has_update());
+}
+
+TEST(reactive, observerCreatedAfterSet) {
+    reactive::state<int> s{};
+    s.set(10);
+    s.set(20);
+
+    auto o = s.make_observer();
+    // observer created after updates should see the current value as an update
+    EXPECT_TRUE(o.has_update());
+    EXPECT_EQ(o.consume(), 20);
+    EXPECT_FALSE(o.has_update());
+}
+
+TEST(reactive, all) {
+    reactive::state<int> s1{};
+    reactive::state<std::string> s2{};
+
+    auto o1 = s1.make_observer();
+    auto o2 = s2.make_observer();
+
+    // neither has a value
+    EXPECT_FALSE(reactive::all(o1, o2).has_value());
+
+    // only s1 has value
+    s1.set(42);
+    EXPECT_FALSE(reactive::all(o1, o2).has_value());
+
+    // both have values now
+    s2.set("hello");
+    {
+        auto result = reactive::all(o1, o2);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(std::get<0>(*result), 42);
+        EXPECT_EQ(std::get<1>(*result), "hello");
+    }
+
+    // after consuming via all, no more updates
+    EXPECT_FALSE(reactive::all(o1, o2).has_value());
+
+    // update one - still returns false (both need update)
+    s1.set(100);
+    EXPECT_FALSE(reactive::all(o1, o2).has_value());
+
+    // update both
+    s2.set("world");
+    {
+        auto result = reactive::all(o1, o2);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(std::get<0>(*result), 100);
+        EXPECT_EQ(std::get<1>(*result), "world");
+    }
+}
+
+TEST(reactive, allSingle) {
+    reactive::state<int> s{};
+    auto o = s.make_observer();
+
+    EXPECT_FALSE(reactive::all(o).has_value());
+
+    s.set(5);
+    {
+        auto result = reactive::all(o);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(std::get<0>(*result), 5);
+    }
+
+    EXPECT_FALSE(reactive::all(o).has_value());
+}
+
 } // namespace sl::meta

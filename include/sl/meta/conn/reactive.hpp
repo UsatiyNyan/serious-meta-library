@@ -16,6 +16,10 @@ template <typename T>
 struct state {
     meta::maybe<T> value{};
     std::uint32_t version = 0;
+
+    constexpr meta::maybe<const T&> peek() const& {
+        return value.map([](const T& v) -> const T& { return v; });
+    }
 };
 
 } // namespace detail
@@ -24,11 +28,9 @@ template <typename T>
 struct [[nodiscard]] observer {
     constexpr observer(detail::state<T>* state) : state_{ state } {}
 
-    meta::maybe<const T&> peek() const& {
-        return state_->value.map([](const T& v) -> const T& { return v; });
-    }
+    constexpr meta::maybe<const T&> peek() const& { return state_->peek(); }
 
-    [[nodiscard]] meta::maybe<const T&> consume() & {
+    [[nodiscard]] constexpr meta::maybe<const T&> consume() & {
         if (!has_update()) {
             return meta::null;
         }
@@ -36,9 +38,9 @@ struct [[nodiscard]] observer {
         return state_->value.value();
     }
 
-    void touch() & { observed_version_.reset(); }
+    constexpr void touch() & { observed_version_.reset(); }
 
-    bool has_update() const& { return state_->value.has_value() && observed_version_ != state_->version; }
+    constexpr bool has_update() const& { return state_->value.has_value() && observed_version_ != state_->version; }
 
 private:
     meta::maybe<std::uint32_t> observed_version_{};
@@ -64,11 +66,13 @@ public:
     }
 
     constexpr std::uint32_t set_if_ne(T value) & {
-        if (value == state_) {
+        if (value == state_->value) {
             return state_->version;
         }
         return set(std::move(value));
     }
+
+    constexpr meta::maybe<const T&> peek() const& { return state_->peek(); }
 
 private:
     std::unique_ptr<detail::state<T>> state_ = std::make_unique<detail::state<T>>();

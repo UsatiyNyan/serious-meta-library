@@ -36,6 +36,8 @@ struct [[nodiscard]] observer {
         return state_->value.value();
     }
 
+    void touch() & { observed_version_.reset(); }
+
     bool has_update() const& { return state_->value.has_value() && observed_version_ != state_->version; }
 
 private:

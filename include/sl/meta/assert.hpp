@@ -44,8 +44,10 @@ inline void print_err(auto&& arg, auto&&... args) {
 
 #ifdef NDEBUG
 #define DEBUG_ASSERT(...) (void)0;
-#define DEBUG_ASSERT_VAL(EXPR, ...) EXPR
+#define DEBUG_ASSERT_VAL(EXPR, ...) (EXPR)
+#define DEBUG_PANIC(...) (void)0;
 #else
 #define DEBUG_ASSERT(EXPR, ...) SL_ASSERT(EXPR, DEBUG_ASSERT, , __FILE__, __LINE__, __VA_ARGS__)
 #define DEBUG_ASSERT_VAL(EXPR, ...) SL_ASSERT_VAL(EXPR, DEBUG_ASSERT, , __FILE__, __LINE__, __VA_ARGS__)
+#define DEBUG_PANIC(...) PANIC(__VA_ARGS__)
 #endif
